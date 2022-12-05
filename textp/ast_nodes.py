@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import List
 from dataclasses import dataclass
 
 
@@ -39,3 +40,18 @@ class GetVariableValue:
 @dataclass
 class Number:
     value: float
+
+
+@dataclass
+class Statement:
+    pass
+
+
+@dataclass
+class StatementList:
+    statements: List[Statement]
+
+    def append(self, statement: Statement):
+        new_statements = self.statements + [statement]
+        return StatementList(statements=new_statements)
+    

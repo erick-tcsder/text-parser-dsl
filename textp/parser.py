@@ -15,11 +15,11 @@ def p_statement_list(p):
                       | empty'''
     no_statement = len(p) == 2
     if no_statement:
-        p[0] = []
+        p[0] = ast_nodes.StatementList([])
     elif p[3] == ';':
         statement_list = p[1]
         statement = p[2]
-        p[0] = statement_list + [statement]  
+        p[0] = statement_list.append(statement)  
     else:
         # @TODO grita
         pass
@@ -97,6 +97,6 @@ if __name__ == '__main__':
 
 # @TODO visitante con los chekeos sema'nticos:
 # - TYPE sea un tipo va'lido
-# - q el programa tenga un statement output
 # - cuando se kiera obtener el valor de una variable, esa variable tiene q existir
 # @TODO visitante evaluador
+# - q el programa tenga un statement output
