@@ -77,7 +77,34 @@ def p_expression(p):
     else:
         p[0] = ast_nodes.GetVariableValue(name=p[1])
 
-    
+#added
+def p_grepexp(p):
+    '''grepexp : GREP WORD FROM WORD'''
+    p[0] = ("GREP", p[2], p[4])
+
+def p_selectorexp(p):
+    '''selectexp : SELECT WORD FROM WORD DO LCURLY actions RCURLY'''
+    p[0] = ("SELECTOR", p[2], p[4], p[6])
+
+def p_eachexp(p):
+    '''eachexp : EACH WORD FROM WORD DO LCURLY actions RCURLY'''
+    p[0] = ("EACH", p[2], p[4], p[6])
+
+def p_findexp(p):
+    '''findexp : FIND WORD FROM WORD'''
+    p[0] = ("FIND", p[2], p[4])
+
+def p_actions(p):
+    '''actions : action
+               | actions action'''
+    if len(p) == 2:
+        p[0] = [p[1]]
+    else:
+        p[0] = p[1] + [p[2]]
+
+def p_action(p):
+    '''action : WORD LBRACKET WORD RBRACKET'''
+    p[0] = (p[1], p[3])  
 
 parser = yacc.yacc()
 

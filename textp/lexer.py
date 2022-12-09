@@ -11,7 +11,16 @@ tokens = (
     'DPOUT',
     'ID',
     'TYPE',
-    'NUMBER')
+    'NUMBER',
+    'GREP',
+    'SELECTOR',
+    'EACH',
+    'FIND',
+    'FROM',
+    'DO',
+    'WORD',
+    'LCURLY',
+    'RCURLY',)
 
 
 t_SEMICOLON = ';'
@@ -21,6 +30,15 @@ t_DPIN = 'DPIN'
 t_DPOUT = 'DPOUT'
 t_OPEN_BRACKET = r'\['
 t_CLOSED_BRACKET = r'\]'
+t_LCURLY = r'\{'
+t_RCURLY = r'\}'
+t_GREP = 'GREP'
+t_SELECTOR = 'SELECTOR'
+t_EACH = 'EACH'
+t_FIND = 'FIND'
+t_FROM = 'FROM'
+t_DO = 'DO'
+t_WORD = r'[[_a-zA-Z][_a-zA-Z0-9]*]'
 t_ID = r'[_a-zA-Z][_a-zA-Z0-9]*'
 t_ignore = ' \t\n'
 
@@ -34,6 +52,7 @@ def t_NUMBER(t):
 # Se implemento la funcion por el orden de prioridad que aplica
 # ply para las expresiones regulares
 # ver https://stackoverflow.com/questions/2910338
+
 def t_TYPE(token):
     r'[_A-Z]+' 
     return token
