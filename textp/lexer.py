@@ -26,6 +26,10 @@ tokens = (
 t_SEMICOLON = ';'
 t_EQUALS = '='
 t_GREATER = '>'
+# TODO: Quitar las palabras claves como tokens
+# La razón de esto está aquí https://ply.readthedocs.io/en/latest/ply.html#specification-of-tokens
+# Básicamente se pueden detectar como prefijo de otra palabra
+# Ahí dice cómo hacerlo
 t_DPIN = 'DPIN'
 t_DPOUT = 'DPOUT'
 t_OPEN_BRACKET = r'\['
@@ -52,7 +56,9 @@ def t_NUMBER(t):
 # Se implemento la funcion por el orden de prioridad que aplica
 # ply para las expresiones regulares
 # ver https://stackoverflow.com/questions/2910338
-
+# TODO La diferencia entre tipo y id es sintáctica?
+# Si los tipos se escriben distinto ok, sino se debería poner
+# como id y en el checkeo semántico comprobar qué es
 def t_TYPE(token):
     r'[_A-Z]+' 
     return token
