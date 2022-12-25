@@ -3,13 +3,50 @@ from ply import lex
 
 tokens = (
     'SEMICOLON',
-    'OPEN_BRACKET',
-    'CLOSED_BRACKET',
-    'EQUALS',
-    'GREATER',
+
+    # region ConditionalsNames
+    'EQ',
+    'NEQ',
+    'GR',
+    'LS',
+    'GEQ',
+    'LEQ',
+    'NOT',
+    # endregion
+
+    # region BracketlikesNames
+    'LBRACKET',
+    'RBRACKET',
+    'LCURLY',
+    'RCURLY',
+    'LPAREN',
+    'RPAREN',
+    # endregion
+
+    'ID',  # Standard id
+
+    # region ArithmeticNames
+    'PLUS',
+    'MINUS',
+    'TIMES',
+    'DIVIDE',
+    # endregion
+
+    # region BitNames
+    'BAND',
+    'BOR',
+    'BXOR',
+    'BNOT',
+    # endregion
+
+    # region ExtraOpsNames
+    'RARROW',
+    # endregion
+
+    'STRING',
+
     'DPIN',
     'DPOUT',
-    'ID',
     'TYPE',
     'NUMBER',
     'GREP',
@@ -19,23 +56,66 @@ tokens = (
     'FROM',
     'DO',
     'WORD',
-    'LCURLY',
-    'RCURLY',)
+)
 
 
 t_SEMICOLON = ';'
-t_EQUALS = '='
-t_GREATER = '>'
+
+# region Conditionals
+t_EQ = '=='
+t_NEQ = '!='
+t_GR = '>'
+t_LS = '<'
+t_GEQ = '>='
+t_LEQ = '<='
+t_NOT = '!'
+# endregion
+
+# region Bracketlikes
+t_LBRACKET = r'\['
+t_RBRACKET = r'\]'
+t_LCURLY = r'\{'
+t_RCURLY = r'\}'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+# endregion
+
+# region Arithmetic
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_DIVIDE = r'/'
+# endregion
+
+# region Bit
+t_BAND = r'&'
+t_BOR = r'\|'
+t_XOR = r'\^'
+t_BNOT = r'~'
+# endregion
+
+# region ExtraOps
+t_BARROW = r'->'
+# endregion
+
+
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+
 # TODO: Quitar las palabras claves como tokens
 # La razón de esto está aquí https://ply.readthedocs.io/en/latest/ply.html#specification-of-tokens
 # Básicamente se pueden detectar como prefijo de otra palabra
 # Ahí dice cómo hacerlo
+
+
+def t_STRING(t):
+    r'"(\.|[^\"])*"'
+    t.value = t.value[1:-1]
+    return t
+
 t_DPIN = 'DPIN'
 t_DPOUT = 'DPOUT'
-t_OPEN_BRACKET = r'\['
-t_CLOSED_BRACKET = r'\]'
-t_LCURLY = r'\{'
-t_RCURLY = r'\}'
 t_GREP = 'GREP'
 t_SELECTOR = 'SELECTOR'
 t_EACH = 'EACH'
@@ -44,7 +124,8 @@ t_FROM = 'FROM'
 t_DO = 'DO'
 t_WORD = r'[[_a-zA-Z][_a-zA-Z0-9]*]'
 t_ID = r'[_a-zA-Z][_a-zA-Z0-9]*'
-t_ignore = ' \t\n'
+
+t_ignore = ' \t'
 
 
 def t_NUMBER(t):

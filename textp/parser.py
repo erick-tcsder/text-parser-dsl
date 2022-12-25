@@ -33,7 +33,7 @@ def p_statement(p):
 
 
 def p_variable(p):
-    '''variable_def : type ID EQUALS expression'''
+    '''variable_def : type ID ASSIGN expression'''
     p[0] = ast_nodes.VariableDefinition(
         _type = p[1],
         name = p[2],
@@ -43,7 +43,7 @@ def p_variable(p):
 
 def p_type(p):
     '''type : TYPE
-            | TYPE OPEN_BRACKET CLOSED_BRACKET'''
+            | TYPE LBRACKET RBRACKET'''
     simple_type = len(p) == 2
     if simple_type:
         p[0] = ast_nodes.Type(name=p[1])
