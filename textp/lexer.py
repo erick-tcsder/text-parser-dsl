@@ -4,6 +4,10 @@ from ply import lex
 tokens = (
     'SEMICOLON',
 
+    # region ExtraFirstOpsNames
+    'RARROW',
+    # endregion
+
     # region ConditionalsNames
     'EQ',
     'NEQ',
@@ -39,9 +43,8 @@ tokens = (
     'BNOT',
     # endregion
 
-    # region ExtraOpsNames
-    'RARROW',
-    # endregion
+    'ASSIGN',
+    'POINT',
 
     'STRING',
 
@@ -60,6 +63,10 @@ tokens = (
 
 
 t_SEMICOLON = ';'
+
+# region ExtraFirstOps
+t_BARROW = r'->'
+# endregion
 
 # region Conditionals
 t_EQ = '=='
@@ -94,25 +101,20 @@ t_XOR = r'\^'
 t_BNOT = r'~'
 # endregion
 
-# region ExtraOps
-t_BARROW = r'->'
-# endregion
-
-
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
-
-# TODO: Quitar las palabras claves como tokens
-# La razón de esto está aquí https://ply.readthedocs.io/en/latest/ply.html#specification-of-tokens
-# Básicamente se pueden detectar como prefijo de otra palabra
-# Ahí dice cómo hacerlo
+t_ASSIGN = r'='
+t_POINT = r'\.'
 
 
 def t_STRING(t):
     r'"(\.|[^\"])*"'
     t.value = t.value[1:-1]
     return t
+
+# TODO: Quitar las palabras claves como tokens
+# La razón de esto está aquí https://ply.readthedocs.io/en/latest/ply.html#specification-of-tokens
+# Básicamente se pueden detectar como prefijo de otra palabra
+# Ahí dice cómo hacerlo
+
 
 t_DPIN = 'DPIN'
 t_DPOUT = 'DPOUT'
@@ -129,7 +131,7 @@ t_ignore = ' \t'
 
 
 def t_NUMBER(t):
-    r'\d+(.\d+)?'  
+    r'\d+(.\d+)?'
     t.value = float(t.value)
     return t
 
@@ -141,8 +143,13 @@ def t_NUMBER(t):
 # Si los tipos se escriben distinto ok, sino se debería poner
 # como id y en el checkeo semántico comprobar qué es
 def t_TYPE(token):
-    r'[_A-Z]+' 
+    r'[_A-Z]+'
     return token
+
+
+def t_newline(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
 
 
 def t_error(t):
@@ -150,7 +157,7 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-#construye el lexer
+# construye el lexer
 lex.lex()
 
 
