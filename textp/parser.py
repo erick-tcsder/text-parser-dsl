@@ -75,19 +75,34 @@ def p_binary(p):
                   | DIVIDE
                   | MINUS
                   | EQ
-                  | GEQ
                   | NEQ
+                  | GEQ
+                  | LEQ
                   | NOT
+                  | BNOT
                   | PLUS
-                  | TIMES'''
+                  | TIMES
+                  | GR
+                  | LS'''
         p[0] = p[1]
 
 
 def p_expression(p):
     '''expression : ID
                   | NUMBER
-                  | expression binary expression'''
-    if len(p)==4:
+                  | NUMBER binary expression
+                  | ID binary expression
+                  | LPAREN expression RPAREN
+                  | LPAREN expression RPAREN binary expression'''
+   
+    if len(p) == 6:
+        p[0] = ast_nodes.BinaryOp(
+            var1 = p[2],
+            var2 = p[5],
+            op = p[4] )
+    elif p[1] == '(':
+        p[0] = p[2]
+    elif len(p)==4:
         p[0] = ast_nodes.BinaryOp(
             var1 = p[1],
             var2 = p[3],
@@ -113,7 +128,7 @@ def parse(data, debug=False):
 
 
 if __name__ == '__main__':
-    print(parse('INT jelow = num & 2;', debug=False))
+    print(parse('INT jelow = num & ( 7 > 2 );', debug=False))
     print(parse('INT five = 5;', debug=False))
 
 
