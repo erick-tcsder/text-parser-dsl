@@ -1,7 +1,22 @@
 from ply import lex
 
+reserved = {
+   'if' : 'IF',
+   'then' : 'THEN',
+   'else' : 'ELSE',
+   'while' : 'WHILE',
+   'greep': 'GREEP',
+   'select': 'SELECTOR',
+   'each': 'EACH',
+   'from':'FROM',
+   'do':'DO',
+   'find':'FIND',
+   'regexp':'REGEXP',
+   'filter':'FILTER',
+   'word': 'WORD',
+}
 
-tokens = (
+tokens = [
     'SEMICOLON',
 
     # region ExtraFirstOpsNames
@@ -52,7 +67,7 @@ tokens = (
     'DPOUT',
     'TYPE',
     'NUMBER',
-)
+] + list(reserved.values())
 
 
 t_SEMICOLON = ';'
@@ -111,6 +126,7 @@ def t_STRING(t):
 
 t_DPIN = 'DPIN'
 t_DPOUT = 'DPOUT'
+
 t_ID = r'[_a-zA-Z][_a-zA-Z0-9]*'
 
 t_ignore = ' \t'
