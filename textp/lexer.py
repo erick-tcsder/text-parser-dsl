@@ -5,7 +5,7 @@ tokens = (
     'SEMICOLON',
 
     # region ExtraFirstOpsNames
-    'RARROW',
+    'BARROW',
     # endregion
 
     # region ConditionalsNames
@@ -52,20 +52,13 @@ tokens = (
     'DPOUT',
     'TYPE',
     'NUMBER',
-    'GREP',
-    'SELECTOR',
-    'EACH',
-    'FIND',
-    'FROM',
-    'DO',
-    'WORD',
 )
 
 
 t_SEMICOLON = ';'
 
 # region ExtraFirstOps
-t_BARROW = r'->'
+#t_BARROW = r'->'
 # endregion
 
 # region Conditionals
@@ -97,7 +90,7 @@ t_DIVIDE = r'/'
 # region Bit
 t_BAND = r'&'
 t_BOR = r'\|'
-t_XOR = r'\^'
+#t_XOR = r'\^'
 t_BNOT = r'~'
 # endregion
 
@@ -118,13 +111,6 @@ def t_STRING(t):
 
 t_DPIN = 'DPIN'
 t_DPOUT = 'DPOUT'
-t_GREP = 'GREP'
-t_SELECTOR = 'SELECTOR'
-t_EACH = 'EACH'
-t_FIND = 'FIND'
-t_FROM = 'FROM'
-t_DO = 'DO'
-t_WORD = r'[[_a-zA-Z][_a-zA-Z0-9]*]'
 t_ID = r'[_a-zA-Z][_a-zA-Z0-9]*'
 
 t_ignore = ' \t'

@@ -56,55 +56,50 @@ def p_empty(p):
 
 
 def p_input(p):
-    '''input : DPIN GREATER GREATER ID'''
+    '''input : DPIN GR GR ID'''
     p[0] = ast_nodes.ReceivingFromInput(
-        variable_name = p[-1]
+        variable_name = p[4]
     )
     
 
 def p_output(p):
-    '''output : ID GREATER GREATER DPOUT'''
+    '''output : ID GR GR DPOUT'''
     p[0] = ast_nodes.SendingToOutput(
         text_to_send = p[1]
     )
 
-    
+def p_binary(p):
+        '''binary : BAND
+                  | BOR
+                  | BXOR
+                  | DIVIDE
+                  | MINUS
+                  | EQ
+                  | GEQ
+                  | NEQ
+                  | NOT
+                  | PLUS
+                  | TIMES'''
+        p[0] = p[1]
+
+
 def p_expression(p):
     '''expression : ID
-                  | NUMBER'''
-    if utils.is_float(p[1]):
+                  | NUMBER
+                  | expression binary expression'''
+    if len(p)==4:
+        p[0] = ast_nodes.BinaryOp(
+            var1 = p[1],
+            var2 = p[3],
+            op = p[2] )
+    elif utils.is_float(p[1]):
         p[0] = ast_nodes.Number(value=p[1])
     else:
         p[0] = ast_nodes.GetVariableValue(name=p[1])
 
-#added
-def p_grepexp(p):
-    '''grepexp : GREP WORD FROM WORD'''
-    p[0] = ("GREP", p[2], p[4])
-
-def p_selectorexp(p):
-    '''selectexp : SELECT WORD FROM WORD DO LCURLY actions RCURLY'''
-    p[0] = ("SELECTOR", p[2], p[4], p[6])
-
-def p_eachexp(p):
-    '''eachexp : EACH WORD FROM WORD DO LCURLY actions RCURLY'''
-    p[0] = ("EACH", p[2], p[4], p[6])
-
-def p_findexp(p):
-    '''findexp : FIND WORD FROM WORD'''
-    p[0] = ("FIND", p[2], p[4])
-
-def p_actions(p):
-    '''actions : action
-               | actions action'''
-    if len(p) == 2:
-        p[0] = [p[1]]
-    else:
-        p[0] = p[1] + [p[2]]
-
-def p_action(p):
-    '''action : WORD LBRACKET WORD RBRACKET'''
-    p[0] = (p[1], p[3])  
+def p_error(t):
+    print("Illegal sentence %s" % t.value[0])
+    t.lexer.skip(1)
 
 parser = yacc.yacc()
 
@@ -118,7 +113,7 @@ def parse(data, debug=False):
 
 
 if __name__ == '__main__':
-    print(parse('INT jelow = num;', debug=False))
+    print(parse('INT jelow = num & 2;', debug=False))
     print(parse('INT five = 5;', debug=False))
 
 
@@ -126,4 +121,4 @@ if __name__ == '__main__':
 # - TYPE sea un tipo va'lido
 # - cuando se kiera obtener el valor de una variable, esa variable tiene q existir
 # @TODO visitante evaluador
-# - q el programa tenga un statement output
+# - q el programa tenga un statement output 

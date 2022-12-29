@@ -33,29 +33,29 @@ class SemanticChecker:
     def visit_type(self, node):
         # Verificar que el tipo no se haya definido previamente
         if node.name in self.types:
-        raise SemanticError(f"Type {node.name} already defined")
+            raise SemanticError(f"Type {node.name} already defined")
 
         # Añadir el tipo al diccionario de tipos definidos
         self.types[node.name] = node
 
-    @visitor(ast_nodes.ListOfType)
+    @visitor(ListOfType)
     def visit_list_of_type(self, node):
         # Verificar que el tipo no se haya definido previamente
         if node.name in self.types:
-        raise SemanticError(f"Type {node.name} already defined")
+            raise SemanticError(f"Type {node.name} already defined")
 
         # Añadir el tipo al diccionario de tipos definidos
         self.types[node.name] = node
 
-    @visitor(ast_nodes.Assignment)
+    @visitor(Assignment)
     def visit_assignment(self, node):
         # Verificar que el tipo de la variable se haya definido
         if node.var_type not in self.types:
-        raise SemanticError(f"Type {node.var_type} not defined")
+            raise SemanticError(f"Type {node.var_type} not defined")
 
         # Verificar que el tipo del valor coincida con el tipo de la variable
         if type(node.value).__name__ != self.types[node.var_type].name:
-        raise SemanticError(f"Value of type {type(node.value).__name__} cannot be assigned to variable of type {node.var_type}")
+            raise SemanticError(f"Value of type {type(node.value).__name__} cannot be assigned to variable of type {node.var_type}")
         
     @visitor(Actions)
     def visit(self, node):

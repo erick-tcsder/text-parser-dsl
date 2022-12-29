@@ -46,6 +46,11 @@ class Number:
 class Statement:
     pass
 
+@dataclass
+class BinaryOp:
+    var1: Expression
+    var2: Expression
+    op: str
 
 @dataclass
 class StatementList:
