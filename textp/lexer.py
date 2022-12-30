@@ -123,6 +123,10 @@ def t_STRING(t):
 # Básicamente se pueden detectar como prefijo de otra palabra
 # Ahí dice cómo hacerlo
 
+# IMPORTANTE: es necesario la implementacion de metodos para definir las expresiones
+# refuex porque la biblioteca ply prioriza metodos por encima de las definiciones normales
+# y las palabras reservadas van a matchear primero con type o con Id que con sus definiciones
+# con las implementaciones de los metodos no :)
 def t_IF(t):
     r'IF'
     return t
