@@ -28,7 +28,8 @@ def p_statement(p):
     '''statement : if_statement
                  | assign
   	             | input
-                 | output'''
+                 | output
+                 | function_definition'''
     p[0] = p[1]
 
 
@@ -71,6 +72,44 @@ def p_output(p):
 def p_expression(p):
     '''expression : boolean_expression'''
     p[0] = p[1]
+
+# def p_function_definition_list(p):
+#     '''function_definition_list : function_definition_list function_definition
+#                                 | empty'''
+#     if len(p) == 2:
+#         p[0] = ast_nodes.FunctionDefinitionList([])
+#     else:
+#         function_definition_list = p[1]
+#         function_definition = p[2]
+#         p[0] = function_definition_list.append(function_definition)
+
+def p_function_definition(p):
+    '''function_definition : DEF ID LPAREN parameter_list RPAREN COLON statement_list'''
+    p[0] = ast_nodes.FunctionDefinition(
+        name = p[2],
+        parameters = p[4],
+        statements = p[7]
+    )
+
+def p_parameter_list(p):
+    '''parameter_list : parameter_list COMMA parameter
+                      | parameter
+                      | empty'''
+    if len(p) == 2:
+        p[0] = ast_nodes.ParameterList([])
+    elif len(p) == 4:
+        parameter_list = p[1]
+        parameter = p[3]
+        p[0] = parameter_list.append(parameter)
+    else:
+        p[0] = p[1]
+
+def p_parameter(p):
+    '''parameter : type ID'''
+    p[0] = ast_nodes.Parameter(
+        _type = p[1],
+        name = p[2]
+    )
 
 def p_if_statement(p):
     '''if_statement : IF expression THEN statement_list ELSE statement_list'''
@@ -203,7 +242,7 @@ def parse(data, debug=False):
 
 
 if __name__ == '__main__':
-    print(parse('IF ((5 > 2) & (4 > 1)) THEN INT jj = 5; ELSE INT kk = 6; ;', debug=False))
+    print(parse('DEF functi (INT a, INT b, INT c) : INT c=1; ;', debug=False))
 
 
 # @TODO visitante con los chekeos sema'nticos:

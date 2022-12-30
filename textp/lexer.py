@@ -67,10 +67,15 @@ tokens = [
     'DPOUT',
     'TYPE',
     'NUMBER',
+    'COMMA',
+    'DEF',
+    'COLON',
 ] + list(reserved.values())
 
 
 t_SEMICOLON = ';'
+t_COLON = ':'
+t_COMMA = ','
 
 # region ExtraFirstOps
 #t_BARROW = r'->'
@@ -137,6 +142,10 @@ def t_THEN(t):
 
 def t_ELSE(t):
     r'ELSE'
+    return t
+
+def t_DEF(t):
+    r'DEF'
     return t
 
 t_DPIN = 'DPIN'
