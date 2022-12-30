@@ -70,8 +70,16 @@ def p_output(p):
     )
 
 def p_expression(p):
-    '''expression : boolean_expression'''
+    '''expression : boolean_expression
+                  | regex_expression'''
     p[0] = p[1]
+
+def p_regex_expression(p):
+    '''regex_expression : GREP STRING_LITERAL FROM ID'''
+    p[0] = ast_nodes.RegexExpression(
+        pattern=p[2],
+        target=p[4]
+    )
 
 # def p_function_definition_list(p):
 #     '''function_definition_list : function_definition_list function_definition

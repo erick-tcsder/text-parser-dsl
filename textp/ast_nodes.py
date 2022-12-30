@@ -132,3 +132,8 @@ class FunctionDefinitionList:
     def append(self, function_definition: FunctionDefinition):
         new_function_definitions = self.function_definitions + [function_definition]
         return FunctionDefinitionList(function_definitions=new_function_definitions)
+    
+@dataclass
+class RegexExpression:
+    pattern: str
+    target: str
