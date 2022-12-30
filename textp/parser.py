@@ -24,12 +24,11 @@ def p_statement_list(p):
         # @TODO grita
         pass
 
-
 def p_statement(p):
-    '''statement : assign
+    '''statement : if_statement
+                 | assign
   	             | input
-                 | output
-                 | if_statement'''
+                 | output'''
     p[0] = p[1]
 
 
@@ -74,7 +73,7 @@ def p_expression(p):
     p[0] = p[1]
 
 def p_if_statement(p):
-    'if_statement : IF expression THEN statement ELSE statement'
+    '''if_statement : IF expression THEN statement_list ELSE statement_list'''
     p[0] = ast_nodes.IFStatement(
         exp = p[2],
         THENstatemet= p[4],
@@ -134,7 +133,7 @@ def p_comparison(p):
 def p_math_expressions(p):
     '''math_expression : term
                        | math_expression PLUS term
-                       | math_expression MINUS term'''
+                       | math_expression MINUS term''' 
     
     if len(p) == 2:
         p[0] = p[1]
@@ -204,12 +203,11 @@ def parse(data, debug=False):
 
 
 if __name__ == '__main__':
-    print(parse('INT jelow = num & ( 7 > 2 );', debug=False))
-    print(parse('INT five = 5;', debug=False))
+    print(parse('IF ((5 > 2) & (4 > 1)) THEN INT jj = 5; ELSE INT kk = 6; ;', debug=False))
 
 
 # @TODO visitante con los chekeos sema'nticos:
 # - TYPE sea un tipo va'lido
 # - cuando se kiera obtener el valor de una variable, esa variable tiene q existir
 # @TODO visitante evaluador
-# - q el programa tenga un statement output 
+# - q el programa tenga un statement output

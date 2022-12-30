@@ -123,6 +123,17 @@ def t_STRING(t):
 # Básicamente se pueden detectar como prefijo de otra palabra
 # Ahí dice cómo hacerlo
 
+def t_IF(t):
+    r'IF'
+    return t
+
+def t_THEN(t):
+    r'THEN'
+    return t
+
+def t_ELSE(t):
+    r'ELSE'
+    return t
 
 t_DPIN = 'DPIN'
 t_DPOUT = 'DPOUT'
