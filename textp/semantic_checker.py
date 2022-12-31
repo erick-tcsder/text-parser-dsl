@@ -7,7 +7,10 @@ class SemanticChecker:
     def __init__(self):
         #flag to find SendingToOutput (DPOUT)
         self.sending_to_output_found = False
+        #flag to find ReceivingFromInput (DPIN)
+        self.receiving_from_input_found = False
         self.types ={}
+        self.functions = {}  # <-- agregar esta línea para almacenar las funciones definidas
 
     @visitor(StatementList)
     def visit(self, statement_list: StatementList) -> Boolean:
@@ -47,43 +50,143 @@ class SemanticChecker:
         # Añadir el tipo al diccionario de tipos definidos
         self.types[node.name] = node
 
-    @visitor(Assignment)
-    def visit_assignment(self, node):
-        # Verificar que el tipo de la variable se haya definido
-        if node.var_type not in self.types:
-            raise SemanticError(f"Type {node.var_type} not defined")
 
-        # Verificar que el tipo del valor coincida con el tipo de la variable
-        if type(node.value).__name__ != self.types[node.var_type].name:
-            raise SemanticError(f"Value of type {type(node.value).__name__} cannot be assigned to variable of type {node.var_type}")
+    @visitor(FunctionDefinition)
+    def visit(self, node: FunctionDefinition) -> bool:
+        # Verificar que el tipo de retorno exista
+        if node.return_type not in self.types:
+            raise SemanticError(f"Type {node.return_type} not defined")
+
+        # Verificar que los parámetros tengan tipos válidos
+        for param in node.parameters:
+            if param.type_name not in self.types:
+                raise SemanticError(f"Type {param.type_name} not defined")
+
+        # Verificar que la función no se haya definido previamente
+        if node.name in self.functions:
+            raise SemanticError(f"Function {node.name} already defined")
+
+        # Añadir la función al diccionario de funciones definidas
+        self.functions[node.name] = node
+        return True       
+
+    @visitor(Parameter)
+    def visit(self, node: Parameter) -> bool:
+        # Verificar que el tipo del parámetro exista
+        try:
+            _ = self.types[node._type]
+        except KeyError:  # Type not found
+            raise SemanticError(f"Type {node._type} not defined")
+
+        # Verificar que el nombre del parámetro no se haya utilizado previamente
+        if node.name in self.parameters:
+            raise SemanticError(f"Parameter {node.name} already defined")
+
+        # Añadir el parámetro al diccionario de parámetros definidos
+        self.parameters[node.name] = node
+
+        return True
+
+    @visitor(ParameterList)
+    def visit(self, node: ParameterList) -> bool:
+        for parameter in node.parameters:
+            valid = self.visit(parameter)
+            if not valid:
+                return False
+
+        return True
+
+    @visitor(CMPExp)
+    def visit(self, node: CMPExp) -> bool:
+        # Verificar que las expresiones sean válidas
+        exp1_valid = self.visit(node.exp1)
+        if not exp1_valid:
+            return False
+
+        exp2_valid = self.visit(node.exp2)
+        if not exp2_valid:
+            return False
+
+        # Verificar que el operador sea válido
+        if node.op not in ['<', '>', '<=', '>=', '==', '!=']:
+            raise SemanticError(f"Invalid operator {node.op}")
+
+        return True
+
+    @visitor(PLUSExp)
+    def visit(self, node: PLUSExp) -> bool:
+        # Verificar que la expresión y término sean válidos
+        exp_valid = self.visit(node.exp)
+        if not exp_valid:
+            return False
+
+        term_valid = self.visit(node.term)
+        if not term_valid:
+            return False
+
+        return True
+
+    @visitor(MINUSExp)
+    def visit(self, node: MINUSExp) -> bool:
+        # Verificar que la expresión y término sean válidos
+        exp_valid = self.visit(node.exp)
+        if not exp_valid:
+            return False
+
+        term_valid = self.visit(node.term)
+        if not term_valid:
+            return False
+
+        return True
+
+    @visitor(MINUSExp)
+    def visit(self, node: MINUSExp) -> bool:
+        # Verificar que la expresión y término sean válidos
+        exp_valid = self.visit(node.exp)
+        if not exp_valid:
+            return False
+
+        term_valid = self.visit(node.term)
+        if not term_valid:
+            return False
+
+        return True
+
+    @visitor(TIMESExp)
+    def visit(self, node: TIMESExp) -> bool:
+        # Verificar que la expresión y término sean válidos
+        exp_valid = self.visit(node.exp)
+        if not exp_valid:
+            return False
+
+        term_valid = self.visit(node.term)
+        if not term_valid:
+            return False
         
-    @visitor(Actions)
-    def visit(self, node):
-        pass
+        return True
 
-    @visitor(Action)
-    def visit(self, node):
-        pass
+    @visitor(ReceivingFromInput)
+    def visit(self, node: ReceivingFromInput) -> bool:
+        # Verificar que la variable a la que se le asignará el valor ingresado por el usuario exista
+        if node.variable_name not in self.variables:
+            raise SemanticError(f"Variable {node.variable_name} not defined")
 
-    @visitor(FilterExp)
-    def visit(self, node):
-        pass
+        # Mark the flag as True to indicate that the program is receiving input
+        self.receiving_from_input_found = True
 
-    @visitor(FindExp)
-    def visit(self, node):
-        pass
+        return True
 
-    @visitor(EachExp)
-    def visit(self, node):
-        pass
+    @visitor(SendingToOutput)
+    def visit(self, node: SendingToOutput) -> bool:
+        # Verificar que el texto a enviar sea una expresión válida
+        if not isinstance(node.text_to_send, Expression):
+            raise SemanticError("Invalid expression to send to output")
 
-    @visitor(SelectExp)
-    def visit(self, node):
-        pass
+        # Establecer flag para indicar que se está enviando algo a la salida
+        self.sending_to_output_found = True
 
-    @visitor(GrepExp)
-    def visit(self, node):
-        pass
+        return True
 
-
-    # INT b = 3 + a;
+class SemanticError(Exception):
+    def __init__(self, message: str):
+        self.message = message
