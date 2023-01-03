@@ -185,14 +185,16 @@ def p_math_expressions(p):
     if len(p) == 2:
         p[0] = p[1]
     elif p[2] == '+':
-        p[0] = ast_nodes.PLUSExp(
-            exp = p[1],
-            term = [3]
+        p[0] = ast_nodes.BinaryOperation(
+            left_value = p[1],
+            right_value = p[3],
+            op = '+'
         )
     else:
-        p[0] = ast_nodes.MINUSExp(
-            exp = p[1],
-            term = [3]
+        p[0] = ast_nodes.BinaryOperation(
+            left_value = p[1],
+            right_value = p[3],
+            op = '-'
         )
 
 def p_term(p):
@@ -203,14 +205,16 @@ def p_term(p):
         p[0] = p[1]
     else:
         if p[2] == '*':
-            p[0] = ast_nodes.TIMESExp(
-                term = p[1],
-                factor = [3]
+            p[0] = ast_nodes.BinaryOperation(
+                left_value = p[1],
+                right_value = p[3],
+                op = '*'
             )
         else:
-            p[0] = ast_nodes.DIVIDEExp(
-                term = p[1],
-                factor = [3]
+            p[0] = ast_nodes.BinaryOperation(
+                left_value = p[1],
+                right_value = p[3],
+                op = '/'
             )
     
 def p_comparison_operator(p):

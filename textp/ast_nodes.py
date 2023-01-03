@@ -3,6 +3,7 @@ from typing import List, Union
 from dataclasses import dataclass
 
 
+@dataclass
 class Expression(ABC):
     pass
 
@@ -13,6 +14,11 @@ class VariableDefinition:
     name: str
     value: Expression
     
+@dataclass
+class BinaryOperation:
+    left_value: float
+    right_value: float
+    op: str
 
 @dataclass
 class ReceivingFromInput:
@@ -75,25 +81,25 @@ class CMPExp:
     exp2: Expression
     op: str
     
-@dataclass
-class PLUSExp:
-    exp: Union['PLUSExp', 'MINUSExp']
-    term: Expression
+# @dataclass
+# class PLUSExp:
+#     exp: Union['PLUSExp', 'MINUSExp']
+#     term: Expression
 
-@dataclass
-class MINUSExp:
-    exp: Union['PLUSExp', 'MINUSExp']
-    term: Expression
+# @dataclass
+# class MINUSExp:
+#     exp: Union['PLUSExp', 'MINUSExp']
+#     term: Expression
     
-@dataclass
-class TIMESExp:
-    exp: Union['TIMESExp', 'DIVIDEExp']
-    term: 'Factor'
+# @dataclass
+# class TIMESExp:
+#     exp: Union['TIMESExp', 'DIVIDEExp']
+#     term: 'Factor'
     
-@dataclass
-class DIVIDEExp:
-    exp: Union['TIMESExp', 'DIVIDEExp']
-    term: 'Factor'
+# @dataclass
+# class DIVIDEExp:
+#     exp: Union['TIMESExp', 'DIVIDEExp']
+#     term: 'Factor'
 
 @dataclass
 class Factor:

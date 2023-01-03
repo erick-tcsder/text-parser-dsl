@@ -11,6 +11,8 @@ class SemanticChecker:
         self.receiving_from_input_found = False
         self.types ={}
         self.functions = {}  # <-- agregar esta línea para almacenar las funciones definidas
+        # Atributo para almacenar los parámetros definidos
+        self.parameters = {}
 
     @visitor(StatementList)
     def visit(self, statement_list: StatementList) -> Boolean:
@@ -111,58 +113,6 @@ class SemanticChecker:
         if node.op not in ['<', '>', '<=', '>=', '==', '!=']:
             raise SemanticError(f"Invalid operator {node.op}")
 
-        return True
-
-    @visitor(PLUSExp)
-    def visit(self, node: PLUSExp) -> bool:
-        # Verificar que la expresión y término sean válidos
-        exp_valid = self.visit(node.exp)
-        if not exp_valid:
-            return False
-
-        term_valid = self.visit(node.term)
-        if not term_valid:
-            return False
-
-        return True
-
-    @visitor(MINUSExp)
-    def visit(self, node: MINUSExp) -> bool:
-        # Verificar que la expresión y término sean válidos
-        exp_valid = self.visit(node.exp)
-        if not exp_valid:
-            return False
-
-        term_valid = self.visit(node.term)
-        if not term_valid:
-            return False
-
-        return True
-
-    @visitor(MINUSExp)
-    def visit(self, node: MINUSExp) -> bool:
-        # Verificar que la expresión y término sean válidos
-        exp_valid = self.visit(node.exp)
-        if not exp_valid:
-            return False
-
-        term_valid = self.visit(node.term)
-        if not term_valid:
-            return False
-
-        return True
-
-    @visitor(TIMESExp)
-    def visit(self, node: TIMESExp) -> bool:
-        # Verificar que la expresión y término sean válidos
-        exp_valid = self.visit(node.exp)
-        if not exp_valid:
-            return False
-
-        term_valid = self.visit(node.term)
-        if not term_valid:
-            return False
-        
         return True
 
     @visitor(ReceivingFromInput)
