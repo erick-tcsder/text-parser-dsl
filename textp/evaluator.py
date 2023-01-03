@@ -6,12 +6,16 @@ class Evaluator:
     def __init__(self):
         self.variables = {}
 
+    @visitor(str)
+    def visit(self, node: str) -> Any:
+        return node
+    
     @visitor(StatementList)
     def visit(self, statement_list: StatementList):
         for statement in statement_list.statements:
             self.visit(statement)
 
-    @visit(Statement)
+    @visitor(Statement)
     def visit(self, statement: Statement):
         """Evalúa una declaración."""
         if isinstance(statement, VariableDefinition):  # si la declaración es una asignación
@@ -75,3 +79,21 @@ class Evaluator:
     def visit(self, node: NOTExp):
         value = self.visit(node.term)
         return not value
+    
+    @visitor(CMPExp)
+    def visit(self, node: CMPExp) -> Any:
+        exp1 = self.visit(node.exp1)
+        exp2 = self.visit(node.exp2)
+
+        if node.op == "==":
+            return exp1 == exp2
+        elif node.op == "!=":
+            return exp1 != exp2
+        elif node.op == "<":
+            return exp1 < exp2
+        elif node.op == ">":
+            return exp1 > exp2
+        elif node.op == "<=":
+            return exp1 <= exp2
+        elif node.op == ">=":
+            return exp1 >= exp2

@@ -2,6 +2,7 @@ from ply import *
 import lexer
 import ast_nodes 
 import utils
+import evaluator
 
 tokens = lexer.tokens
 
@@ -31,7 +32,8 @@ def p_statement(p):
                  | output
                  | function_definition
                  | for_loop
-                 | foreach_loop'''
+                 | foreach_loop
+                 | boolean_expression'''
     p[0] = p[1]
 
 
@@ -285,3 +287,6 @@ if __name__ == '__main__':
     print(parse('FOR i IN 1..5: i >> DPOUT; ;', debug=False))
     print()
     print(parse('FOREACH w IN word: w >> DPOUT; ;', debug=False))
+    ast = parse("5 > 2;")
+    evaluator = evaluator.Evaluator()
+    print(evaluator.visit(ast))
