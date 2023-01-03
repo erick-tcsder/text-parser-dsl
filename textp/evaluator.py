@@ -24,9 +24,14 @@ class Evaluator:
             return self.evaluate_function_call(statement)
 
     @visitor(VariableDefinition)
-    def visit(self, node):
-        value = self.visit(node.value)
-        self.variables[node.name] = value
+    def visit(self, node: VariableDefinition):
+        try:
+            value = self.variables[node.name]
+            return value
+        except:
+            value = self.visit(node.value)
+            self.variables[node.name] = value
+            return value
 
     @visitor(Number)
     def visit(self, node):

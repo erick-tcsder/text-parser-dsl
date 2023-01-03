@@ -287,6 +287,6 @@ if __name__ == '__main__':
     print(parse('FOR i IN 1..5: i >> DPOUT; ;', debug=False))
     print()
     print(parse('FOREACH w IN word: w >> DPOUT; ;', debug=False))
-    ast = parse("5 > 2;")
+    ast = parse("INT k = 5; INT j = k + 5;")
     evaluator = evaluator.Evaluator()
     print(evaluator.visit(ast))

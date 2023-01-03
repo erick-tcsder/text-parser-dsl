@@ -16,8 +16,8 @@ class VariableDefinition:
     
 @dataclass
 class BinaryOperation:
-    left_value: float
-    right_value: float
+    left_value: Expression
+    right_value: Expression
     op: str
 
 @dataclass
