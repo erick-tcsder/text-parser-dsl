@@ -14,6 +14,9 @@ reserved = {
    'regexp':'REGEXP',
    'filter':'FILTER',
    'word': 'WORD',
+   'for': 'FOR',
+   'foreach': 'FOREACH',
+   'in' : 'IN',
 }
 
 tokens = [
@@ -70,12 +73,14 @@ tokens = [
     'COMMA',
     'DEF',
     'COLON',
+    'DOUBLE_DOT',
 ] + list(reserved.values())
 
 
 t_SEMICOLON = ';'
 t_COLON = ':'
 t_COMMA = ','
+t_DOUBLE_DOT = '\.\.'
 
 # region ExtraFirstOps
 #t_BARROW = r'->'
@@ -148,8 +153,21 @@ def t_DEF(t):
     r'DEF'
     return t
 
-t_DPIN = 'DPIN'
-t_DPOUT = 'DPOUT'
+def t_FOREACH(t):
+    r'FOREACH'
+    return t
+
+def t_FOR(t):
+    r'FOR'
+    return t
+
+def t_DPIN(t):
+    r'DPIN'
+    return t
+
+def t_DPOUT(t):
+    r'DPOUT'
+    return t
 
 t_ID = r'[_a-zA-Z][_a-zA-Z0-9]*'
 
@@ -169,9 +187,12 @@ def t_NUMBER(t):
 # Si los tipos se escriben distinto ok, sino se debería poner
 # como id y en el checkeo semántico comprobar qué es
 def t_TYPE(token):
-    r'[_A-Z]+'
+    r'INT|STRING'
     return token
 
+def t_IN(t):
+    r'IN'
+    return t
 
 def t_newline(t):
     r'\n+'

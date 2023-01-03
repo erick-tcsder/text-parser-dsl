@@ -29,7 +29,9 @@ def p_statement(p):
                  | assign
   	             | input
                  | output
-                 | function_definition'''
+                 | function_definition
+                 | for_loop
+                 | foreach_loop'''
     p[0] = p[1]
 
 
@@ -236,7 +238,32 @@ def p_factor(p):
         p[0] = ast_nodes.Number(p[1])
     else:
         ast_nodes.GetVariableValue(p[1])
-    
+
+def p_for_loop(p):
+    '''for_loop : FOR ID IN range COLON statement_list'''
+    p[0] = ast_nodes.ForLoop(
+        loop_variable=p[2],
+        range=p[4],
+        statements=p[6]
+    )
+
+def p_foreach_loop(p):
+    '''foreach_loop : FOREACH ID IN ID COLON statement_list'''
+    p[0] = ast_nodes.ForeachLoop(
+        loop_variable=p[2],
+        iterable=p[4],
+        statements=p[6]
+    )
+
+def p_range(p):
+    '''range : expression DOUBLE_DOT expression
+             | expression'''
+    if len(p) == 4:
+        p[0] = ast_nodes.Range(start=p[1], end=p[3])
+    else:
+        p[0] = ast_nodes.Range(start=p[1])
+
+
 def p_error(t):
     print("Illegal sentence %s" % t.value)
     t.lexer.skip(1)
@@ -254,10 +281,7 @@ def parse(data, debug=False):
 
 if __name__ == '__main__':
     print(parse('DEF functi (INT a, INT b, INT c) : INT c=1; ;', debug=False))
-
-
-# @TODO visitante con los chekeos sema'nticos:
-# - TYPE sea un tipo va'lido
-# - cuando se kiera obtener el valor de una variable, esa variable tiene q existir
-# @TODO visitante evaluador
-# - q el programa tenga un statement output
+    print()
+    print(parse('FOR i IN 1..5: i >> DPOUT; ;', debug=False))
+    print()
+    print(parse('FOREACH w IN word: w >> DPOUT; ;', debug=False))

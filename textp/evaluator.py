@@ -14,9 +14,9 @@ class Evaluator:
     @visit(Statement)
     def visit(self, statement: Statement):
         """Evalúa una declaración."""
-        if isinstance(statement, Assign):  # si la declaración es una asignación
+        if isinstance(statement, VariableDefinition):  # si la declaración es una asignación
             return self.evaluate_assignment(statement)
-        elif isinstance(statement, FunctionCall):  # si la declaración es una llamada a función
+        elif isinstance(statement, FunctionDefinition):  # si la declaración es una llamada a función
             return self.evaluate_function_call(statement)
 
     @visitor(VariableDefinition)
@@ -46,3 +46,32 @@ class Evaluator:
             return left_value * right_value
         elif node.op == "/":
             return left_value / right_value
+        
+    @visitor(ReceivingFromInput)
+    def visit(self, node: ReceivingFromInput):
+        # Obtener el valor de entrada y asignarlo a la variable especificada
+        value = input()
+        self.variables[node.variable_name] = value
+
+    @visitor(SendingToOutput)
+    def visit(self, node: SendingToOutput):
+        # Evaluar la expresión y enviar el resultado a la salida
+        value = self.visit(node.text_to_send)
+        print(value)
+    
+    @visitor(ORExp)
+    def visit(self, node: ORExp):
+        left_value = self.visit(node.exp)
+        right_value = self.visit(node.term)
+        return left_value or right_value
+
+    @visitor(ANDExp)
+    def visit(self, node: ANDExp):
+        left_value = self.visit(node.term)
+        right_value = self.visit(node.factor)
+        return left_value and right_value
+
+    @visitor(NOTExp)
+    def visit(self, node: NOTExp):
+        value = self.visit(node.term)
+        return not value
