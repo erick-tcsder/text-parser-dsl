@@ -10,7 +10,7 @@ class SemanticChecker:
         #flag to find ReceivingFromInput (DPIN)
         self.receiving_from_input_found = False
         self.types ={}
-        self.functions = {}  # <-- agregar esta línea para almacenar las funciones definidas
+        self.functions = {}  # <-- almacenar las funciones definidas
         # Atributo para almacenar los parámetros definidos
         self.parameters = {}
 
@@ -29,9 +29,9 @@ class SemanticChecker:
             return False
 
         try:
-            _ = self.variables[node.name] 
+            _ = self.parameters[node.name] 
         except KeyError:  # variable not found
-            self.variables[node.name] = True
+            self.parameters[node.name] = True
             return True
     
     @visitor(Type)

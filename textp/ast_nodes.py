@@ -16,8 +16,8 @@ class VariableDefinition:
     
 @dataclass
 class BinaryOperation:
-    left_value: float
-    right_value: float
+    left_value: Expression
+    right_value: Expression
     op: str
 
 @dataclass
@@ -73,34 +73,14 @@ class BPrimary:
 @dataclass
 class IFStatement:
     exp: Expression
-    THENstatemet: Statement
-    ELSEstatement: Statement
+    THENstatemet: 'StatementList'
+    ELSEstatement: 'StatementList'
 @dataclass
 class CMPExp:
     exp1: Expression
     exp2: Expression
     op: str
     
-# @dataclass
-# class PLUSExp:
-#     exp: Union['PLUSExp', 'MINUSExp']
-#     term: Expression
-
-# @dataclass
-# class MINUSExp:
-#     exp: Union['PLUSExp', 'MINUSExp']
-#     term: Expression
-    
-# @dataclass
-# class TIMESExp:
-#     exp: Union['TIMESExp', 'DIVIDEExp']
-#     term: 'Factor'
-    
-# @dataclass
-# class DIVIDEExp:
-#     exp: Union['TIMESExp', 'DIVIDEExp']
-#     term: 'Factor'
-
 @dataclass
 class Factor:
     pass
@@ -143,3 +123,20 @@ class FunctionDefinitionList:
 class RegexExpression:
     pattern: str
     target: str
+
+@dataclass
+class ForLoop:
+    loop_variable: str
+    range: Union['Range', Expression]
+    statements: StatementList
+
+@dataclass
+class ForeachLoop:
+    loop_variable: str
+    iterable: str
+    statements: StatementList
+
+@dataclass
+class Range:
+    start: Expression
+    end: Expression
