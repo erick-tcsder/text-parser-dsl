@@ -15,11 +15,16 @@ _methods = {}
 
 def _visitor_impl(self, arg, *args, **kwargs):
     """Actual visitor method implementation."""
-    method = _methods[(_qualname(type(self)), type(arg))]
+    qnam = _qualname(type(self))
+    method = _methods.get((qnam, type(arg)), None)
+    if method is None:
+        return _methods[(qnam, None)](self, arg, *args, **kwargs)
     return method(self, arg, *args, **kwargs)
 
 # The actual @visitor decorator
-def visitor(arg_type):
+
+
+def visitor(arg_type=None):
     """Decorator that creates a visitor method."""
 
     def decorator(fn):
