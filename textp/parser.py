@@ -78,37 +78,6 @@ def p_expression(p):
     '''expression : boolean_expression'''
     p[0] = p[1]
 
-# def p_grep(p):
-#     '''grep : GREP expression FROM WORD'''
-#     p[0] = ast_nodes.Grep(
-#         pattern=p[2],
-#         target=p[4]
-#     )
-
-# def p_select(p):
-#     '''select : SELECT expression FROM WORD DO statement_list'''
-#     p[0] = ast_nodes.Select(
-#         selection=p[2],
-#         source=p[4],
-#         statements=p[6]
-#     )
-
-# def p_each(p):
-#     '''each : EACH WORD FROM WORD DO statement_list'''
-#     p[0] = ast_nodes.Foreach(
-#         loop_variable=p[2],
-#         iterable=p[4],
-#         statements=p[6]
-#     )
-
-# def p_find(p):
-#     '''find : FIND expression FROM WORD'''
-#     p[0] = ast_nodes.Find(
-#         search=p[2],
-#         source=p[4]
-#     )
-
-
 
 # def p_regex_expression(p):
 #     '''regex_expression : GREP STRING_LITERAL FROM ID'''
@@ -116,16 +85,6 @@ def p_expression(p):
 #         pattern=p[2],
 #         target=p[4]
 #     )
-
-# def p_function_definition_list(p):
-#     '''function_definition_list : function_definition_list function_definition
-#                                 | empty'''
-#     if len(p) == 2:
-#         p[0] = ast_nodes.FunctionDefinitionList([])
-#     else:
-#         function_definition_list = p[1]
-#         function_definition = p[2]
-#         p[0] = function_definition_list.append(function_definition)
 
 def p_function_definition(p):
     '''function_definition : DEF ID LPAREN parameter_list RPAREN COLON statement_list'''
