@@ -72,13 +72,11 @@ tokens = [
     'TYPE',
     'NUMBER',
     'COMMA',
-    'COLON',
     'DOUBLE_DOT',
 ] + list(reserved.values())
 
 
 t_SEMICOLON = ';'
-t_COLON = ':'
 t_COMMA = ','
 t_DOUBLE_DOT = '\.\.'
 

@@ -156,7 +156,7 @@ def p_parameter(p):
     )
 
 def p_if_statement(p):
-    '''if_statement : IF expression THEN statement_list ELSE statement_list'''
+    '''if_statement : IF expression THEN LCURLY statement_list RCURLY ELSE LCURLY statement_list RCURLY'''
     p[0] = ast_nodes.IFStatement(
         exp = p[2],
         THENstatemet= p[4],
@@ -276,7 +276,7 @@ def p_factor(p):
         p[0]= ast_nodes.GetVariableValue(p[1])
 
 def p_for_loop(p):
-    '''for_loop : FOR ID IN range COLON statement_list'''
+    '''for_loop : FOR ID IN range LCURLY statement_list RCURLY'''
     p[0] = ast_nodes.ForLoop(
         loop_variable=p[2],
         range=p[4],
@@ -284,7 +284,7 @@ def p_for_loop(p):
     )
 
 def p_foreach_loop(p):
-    '''foreach_loop : FOREACH ID IN ID COLON statement_list'''
+    '''foreach_loop : FOREACH ID IN ID LCURLY statement_list RCURLY'''
     p[0] = ast_nodes.ForeachLoop(
         loop_variable=p[2],
         iterable=p[4],
