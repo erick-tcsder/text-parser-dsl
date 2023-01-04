@@ -126,39 +126,6 @@ def t_STRING(t):
     t.value = t.value[1:-1]
     return t
 
-# TODO: Quitar las palabras claves como tokens
-# La razón de esto está aquí https://ply.readthedocs.io/en/latest/ply.html#specification-of-tokens
-# Básicamente se pueden detectar como prefijo de otra palabra
-# Ahí dice cómo hacerlo
-
-# IMPORTANTE: es necesario la implementacion de metodos para definir las expresiones
-# refuex porque la biblioteca ply prioriza metodos por encima de las definiciones normales
-# y las palabras reservadas van a matchear primero con type o con Id que con sus definiciones
-# con las implementaciones de los metodos no :)
-# def t_IF(t):
-#     r'IF'
-#     return t
-
-# def t_THEN(t):
-#     r'THEN'
-#     return t
-
-# def t_ELSE(t):
-#     r'ELSE'
-#     return t
-
-# def t_DEF(t):
-#     r'DEF '
-#     return t
-
-# def t_FOREACH(t):
-#     r'FOREACH'
-#     return t
-
-# def t_FOR(t):
-#     r'FOR'
-#     return t
-
 def t_DPIN(t):
     r'DPIN'
     return t
@@ -183,14 +150,6 @@ def t_NUMBER(t):
     r'\d+(.\d+)?'
     t.value = float(t.value)
     return t
-
-
-# Se implemento la funcion por el orden de prioridad que aplica
-# ply para las expresiones regulares
-# ver https://stackoverflow.com/questions/2910338
-# TODO La diferencia entre tipo y id es sintáctica?
-# Si los tipos se escriben distinto ok, sino se debería poner
-# como id y en el checkeo semántico comprobar qué es
 
 def t_IN(t):
     r'IN'
