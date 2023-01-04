@@ -17,6 +17,7 @@ reserved = {
    'for': 'FOR',
    'foreach': 'FOREACH',
    'in' : 'IN',
+   'def': 'DEF',
 }
 
 tokens = [
@@ -71,7 +72,6 @@ tokens = [
     'TYPE',
     'NUMBER',
     'COMMA',
-    'DEF',
     'COLON',
     'DOUBLE_DOT',
 ] + list(reserved.values())
@@ -137,29 +137,29 @@ def t_STRING(t):
 # refuex porque la biblioteca ply prioriza metodos por encima de las definiciones normales
 # y las palabras reservadas van a matchear primero con type o con Id que con sus definiciones
 # con las implementaciones de los metodos no :)
-def t_IF(t):
-    r'IF'
-    return t
+# def t_IF(t):
+#     r'IF'
+#     return t
 
-def t_THEN(t):
-    r'THEN'
-    return t
+# def t_THEN(t):
+#     r'THEN'
+#     return t
 
-def t_ELSE(t):
-    r'ELSE'
-    return t
+# def t_ELSE(t):
+#     r'ELSE'
+#     return t
 
-def t_DEF(t):
-    r'DEF'
-    return t
+# def t_DEF(t):
+#     r'DEF '
+#     return t
 
-def t_FOREACH(t):
-    r'FOREACH'
-    return t
+# def t_FOREACH(t):
+#     r'FOREACH'
+#     return t
 
-def t_FOR(t):
-    r'FOR'
-    return t
+# def t_FOR(t):
+#     r'FOR'
+#     return t
 
 def t_DPIN(t):
     r'DPIN'
@@ -169,7 +169,14 @@ def t_DPOUT(t):
     r'DPOUT'
     return t
 
-t_ID = r'[_a-zA-Z][_a-zA-Z0-9]*'
+def t_TYPE(token):
+    r'INT|STRING|WORD'
+    return token
+
+def t_ID(t):
+    r'[_a-zA-Z][_a-zA-Z0-9]*'
+    t.type = reserved.get(t.value,'ID')    # Check for reserved words
+    return t
 
 t_ignore = ' \t'
 
@@ -186,9 +193,6 @@ def t_NUMBER(t):
 # TODO La diferencia entre tipo y id es sintáctica?
 # Si los tipos se escriben distinto ok, sino se debería poner
 # como id y en el checkeo semántico comprobar qué es
-def t_TYPE(token):
-    r'INT|STRING'
-    return token
 
 def t_IN(t):
     r'IN'
