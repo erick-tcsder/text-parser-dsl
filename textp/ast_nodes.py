@@ -140,3 +140,25 @@ class ForeachLoop:
 class Range:
     start: Expression
     end: Expression
+    
+@dataclass
+class Grep(Expression, ABC):
+    pattern: str
+    target: str
+
+@dataclass
+class Select(Expression, ABC):
+    selection: Expression
+    source: str
+    statements: StatementList
+
+@dataclass
+class Foreach(Expression, ABC):
+    loop_variable: str
+    iterable: str
+    statements: StatementList
+
+@dataclass
+class Find(Expression, ABC):
+    search: Expression
+    source: str

@@ -136,6 +136,45 @@ class SemanticChecker:
         self.sending_to_output_found = True
 
         return True
+    
+    def visit_Grep(self, node: Grep):
+    # Verificar que la expresión regular es válida
+        try:
+            re.compile(node.pattern)
+        except re.error:
+            self.add_error(f"Invalid regex pattern: {node.pattern}")
+
+    def visit_Select(self, node: Select):
+    # Verificar que la expresión regular es válida
+        try:
+            re.compile(node.selection)
+        except re.error:
+            self.add_error(f"Invalid regex pattern: {node.selection}")
+        # Verificar que la fuente es una cadena de texto
+        source_type = self.get_variable_type(node.source)
+        if source_type != 'WORD':
+            self.add_error(f"Invalid source type for SELECT: {source_type}")
+        # Verificar que la lista de declaraciones es válida
+        self.visit(node.statements)
+
+    def visit_Foreach(self, node: Foreach):
+    # Verificar que la iterable es una lista
+        iterable_type = self.get_variable_type(node.iterable)
+        if iterable_type != 'WORD[]':
+            self.add_error(f"Invalid iterable type for EACH: {iterable_type}")
+        # Verificar que la lista de declaraciones es válida
+        self.visit(node.statements)
+
+    def visit_Find(self, node: Find):
+    # Verificar que la expresión regular es válida
+        try:
+            re.compile(node.search)
+        except re.error:
+            self.add_error(f"Invalid regex pattern: {node.search}")
+        # Verificar que la fuente es una cadena de texto
+        source_type = self.get_variable_type(node.source)
+        if source_type != 'WORD':
+            self.add_error(f"Invalid source type for FIND: {source_type}")
 
 class SemanticError(Exception):
     def __init__(self, message: str):

@@ -34,7 +34,7 @@ class Evaluator:
             return value
 
     @visitor(Number)
-    def visit(self, node):
+    def visit(self, node: Number):
         return node.value
     
     @visitor(GetVariableValue)
@@ -43,9 +43,9 @@ class Evaluator:
         return self.variables[node.name]
 
     @visitor(BinaryOperation)
-    def visit(self, node):
-        left_value = self.visit(node.left)
-        right_value = self.visit(node.right)
+    def visit(self, node: BinaryOperation):
+        left_value = self.visit(node.left_value)
+        right_value = self.visit(node.right_value)
 
         if node.op == "+":
             return left_value + right_value
