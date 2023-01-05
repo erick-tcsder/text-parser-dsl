@@ -178,6 +178,7 @@ class SemanticChecker:
 
         return True
     
+    @visitor(Grep)
     def visit_Grep(self, node: Grep):
     # Verificar que la expresión regular es válida
         try:
@@ -185,6 +186,7 @@ class SemanticChecker:
         except re.error:
             self.add_error(f"Invalid regex pattern: {node.pattern}")
 
+    @visitor(Select)
     def visit_Select(self, node: Select):
     # Verificar que la expresión regular es válida
         try:
@@ -198,6 +200,7 @@ class SemanticChecker:
         # Verificar que la lista de declaraciones es válida
         self.visit(node.statements)
 
+    @visitor(Foreach)
     def visit_Foreach(self, node: Foreach):
     # Verificar que la iterable es una lista
         iterable_type = self.get_variable_type(node.iterable)
@@ -206,6 +209,7 @@ class SemanticChecker:
         # Verificar que la lista de declaraciones es válida
         self.visit(node.statements)
 
+    @visitor(Find)
     def visit_Find(self, node: Find):
     # Verificar que la expresión regular es válida
         try:
@@ -217,6 +221,27 @@ class SemanticChecker:
         if source_type != 'WORD':
             self.add_error(f"Invalid source type for FIND: {source_type}")
 
+    
+    @visitor(BinaryOperation)
+    def visit(self, node: BinaryOperation) -> Type:
+        # Compute the types of the left and right values
+        left_type = self.visit(node.left_value)
+        right_type = self.visit(node.right_value)
+
+        # If either of the types is incorrect, return None
+        # (the error has already been reported by a previous method)
+        if left_type is None or right_type is None:
+            return None
+
+        # Check that the types of the values match
+        if left_type != right_type:
+            raise SemanticError(f"Mismatch types in binary operation: {left_type} and {right_type}")
+
+        # Check that the operation is valid for the type
+        if left_type == Number and node.op in ['+', '-', '*', '/']:
+            return left_type
+        else:
+            raise SemanticError(f"Invalid operation for type {left_type}: {node.op}")
 class SemanticError(Exception):
     def __init__(self, message: str):
         self.message = message
