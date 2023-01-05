@@ -1,57 +1,55 @@
 from visitor import visitor
 from ast_nodes import *
-from typing import Boolean
-
+import re
 
 class SemanticChecker:
     def __init__(self):
-        #flag to find SendingToOutput (DPOUT)
+        # flag to find SendingToOutput (DPOUT)
         self.sending_to_output_found = False
-        #flag to find ReceivingFromInput (DPIN)
+        # flag to find ReceivingFromInput (DPIN)
         self.receiving_from_input_found = False
-        self.types ={}
-        self.functions = {}  # <-- almacenar las funciones definidas
-        # Atributo para almacenar los parámetros definidos
-        self.parameters = {}
+
+        # Lista de tipos definidas
+        self.types = {"INT": Number}
+        # Lista de funciones definidas
+        self.functions = {}  
+        # Lista de variables definidos
+        self.variables = {}
 
     @visitor(StatementList)
-    def visit(self, statement_list: StatementList) -> Boolean:
+    def visit(self, statement_list: StatementList):
+        '''statement_list : statement_list statement SEMICOLON
+                          | empty'''
+
+        # Comprueba que cada statement sea valido
         for statement in statement_list.statements:            
-            valid = self.visit(statement)
-            if not valid:
-                return False        
+            if self.visit(statement) is None:
+                return False
         return True
     
     @visitor(VariableDefinition)
-    def visit(self, node):
-        initialization_valid = self.visit(node.value)
-        if not initialization_valid:
-            return False
-
-        try:
-            _ = self.parameters[node.name] 
-        except KeyError:  # variable not found
-            self.parameters[node.name] = True
-            return True
-    
-    @visitor(Type)
     def visit_type(self, node):
-        # Verificar que el tipo no se haya definido previamente
-        if node.name in self.types:
-            raise SemanticError(f"Type {node.name} already defined")
+        '''assign : type ID ASSIGN expression'''
 
-        # Añadir el tipo al diccionario de tipos definidos
-        self.types[node.name] = node
+        # Si el tipo de la declaracion es correcto
+        if node._type not in self.types:
+            raise SemanticError(f"Type {node.name} doesn't exists")
 
-    @visitor(ListOfType)
-    def visit_list_of_type(self, node):
-        # Verificar que el tipo no se haya definido previamente
-        if node.name in self.types:
-            raise SemanticError(f"Type {node.name} already defined")
+        # Si el nombre de la variable no esta tomado
+        if node.name in self.variables:
+            raise SemanticError(f"Variable name {node.name} already taken")
 
-        # Añadir el tipo al diccionario de tipos definidos
-        self.types[node.name] = node
+        # Computamos el tipo de la expresión asociada
+        detected_type = self.visit(node.value)
 
+        # Si coincide con el tipo impuesto a la variable, lo devolvemos
+        if detected_type == self.types[node._type]:
+            self.variables[node.name] = self.types[node._type]
+            return self.types[node._type]
+
+        # En caso contrario, devolvemos error
+        elif not detected_type != None:
+            raise SemanticError(f"Cannot  {node.name}")
 
     @visitor(FunctionDefinition)
     def visit(self, node: FunctionDefinition) -> bool:
@@ -60,7 +58,7 @@ class SemanticChecker:
             raise SemanticError(f"Type {node.return_type} not defined")
 
         # Verificar que los parámetros tengan tipos válidos
-        for param in node.parameters:
+        for param in node.variables:
             if param.type_name not in self.types:
                 raise SemanticError(f"Type {param.type_name} not defined")
 
@@ -81,39 +79,82 @@ class SemanticChecker:
             raise SemanticError(f"Type {node._type} not defined")
 
         # Verificar que el nombre del parámetro no se haya utilizado previamente
-        if node.name in self.parameters:
+        if node.name in self.variables:
             raise SemanticError(f"Parameter {node.name} already defined")
 
         # Añadir el parámetro al diccionario de parámetros definidos
-        self.parameters[node.name] = node
+        self.variables[node.name] = node
 
         return True
 
     @visitor(ParameterList)
     def visit(self, node: ParameterList) -> bool:
-        for parameter in node.parameters:
+        for parameter in node.variables:
             valid = self.visit(parameter)
             if not valid:
                 return False
-
         return True
 
     @visitor(CMPExp)
-    def visit(self, node: CMPExp) -> bool:
-        # Verificar que las expresiones sean válidas
-        exp1_valid = self.visit(node.exp1)
-        if not exp1_valid:
-            return False
+    def visit(self, node: CMPExp):
+        '''comparison : math_expression
+                      | comparison comparison_operator math_expression'''
 
-        exp2_valid = self.visit(node.exp2)
-        if not exp2_valid:
-            return False
+        # Verificamos si el nodo se corresponde con la primera producción
+        if node.exp2 is None:
+            return self.visit(node.exp1)
 
-        # Verificar que el operador sea válido
-        if node.op not in ['<', '>', '<=', '>=', '==', '!=']:
-            raise SemanticError(f"Invalid operator {node.op}")
+        # En otro caso, se corresponde con la segunda
+        exp1_type = self.visit(node.exp1)
+        exp2_type = self.visit(node.exp2)
 
-        return True
+        # Si alguna de las expresiones es erronea, devolvemos None
+        # (en este punto, el error ya fue reportado por un metodo anterior)
+        if exp1_type is None or exp2_type is None:
+            return None
+
+        # Una comparación es válida solo si se comparan tipos iguales
+        if exp1_type == exp2_type:
+            return exp1_type
+
+        else:
+            raise SemanticError(f"Mismatch types in comparison")
+
+        
+    @visitor(Factor)
+    def visit(self, node: Factor):
+        '''factor : NUMBER
+                  | ID
+                  | LPAREN math_expression RPAREN'''
+
+        # NOTA: AST NODE FACTOR DEBE TENER TRES CAMPOS
+        # VALUE: SI EL FACTOR ES UN VALOR, EN TAL CASO, EL RESTO DE CAMPOS ESTARAN EN NONE
+        # NAME: SI ES UNA VARIABLE, EN TAL CASO, EL RESTO DE CAMPOS ESTARAN EN NONE
+        # EXP: SI ES UNA EXPRESION, EN TAL CASO, EL RESTO DE CAMPOS EN NONE
+
+        # SIEMPRE PUEDES EVITAR ESO, TENER UN SOLO CAMPO Y CASTEAR, PERO HABRAN CONFLICTOS
+        # POR EJEMPLO, CON LOS STRINGS Y LOS IDS.
+        # SI PONES UN PROTOCOLO PARA EVITAR CONFLICTOS (ENCERRAR LOS STRINGS ENTRE "" POR EJEMPLO)
+        # ENTONCES PUEDES TENER UN SOLO CAMPO Y RESOLVER CASTEANDO.
+        # EN ESE CASO, POR SUPUESTO, NADA DE PREGUNTAR SI ES NONE: PREGUNTAS SI ES UN STRING, Y EN QUE
+        # FORMATO, O SI ES UN EXPRESSION.
+
+        # Verificamos si el nodo se corresponde con la primera producción
+        if node.value is not None:
+            return Number
+
+        # Verificamos si el nodo se corresponde con la segunda producción
+        if node.name is not None:
+            # Verificamos que la variable esté declarada y, en ese caso,
+            # devolvemos el tipo de la variable
+            if node.name in self.variables:
+                return self.variables[node.name]
+            # En otro caso, devolvemos error
+            else:
+                raise SemanticError(f"Variable {node.name} doesn't exists")
+
+        # En otro caso, se trata de la tercera producción
+        return self.visit(node.exp)
 
     @visitor(ReceivingFromInput)
     def visit(self, node: ReceivingFromInput) -> bool:
