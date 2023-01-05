@@ -33,7 +33,7 @@ def p_statement(p):
                  | function_definition
                  | for_loop
                  | foreach_loop
-                 | boolean_expression'''
+                 | expression'''
     p[0] = p[1]
 
 
@@ -78,16 +78,8 @@ def p_expression(p):
     '''expression : boolean_expression'''
     p[0] = p[1]
 
-
-# def p_regex_expression(p):
-#     '''regex_expression : GREP STRING_LITERAL FROM ID'''
-#     p[0] = ast_nodes.RegexExpression(
-#         pattern=p[2],
-#         target=p[4]
-#     )
-
 def p_function_definition(p):
-    '''function_definition : DEF ID LPAREN parameter_list RPAREN COLON statement_list'''
+    '''function_definition : DEF ID LPAREN parameter_list RPAREN LCURLY statement_list RCURLY'''
     p[0] = ast_nodes.FunctionDefinition(
         name = p[2],
         parameters = p[4],
@@ -118,8 +110,8 @@ def p_if_statement(p):
     '''if_statement : IF expression THEN LCURLY statement_list RCURLY ELSE LCURLY statement_list RCURLY'''
     p[0] = ast_nodes.IFStatement(
         exp = p[2],
-        THENstatemet= p[4],
-        ELSEstatement = p[6]
+        THENstatemet= p[5],
+        ELSEstatement = p[9]
     )
 
 def p_boolean_expression(p):
@@ -280,6 +272,8 @@ if __name__ == '__main__':
     #print(parse('for i in 1..5: i >> DPOUT; ;', debug=False))
     print()
     #print(parse('foreach w in wordt: w >> DPOUT; ;', debug=False))
+    
+    print(parse('if a > b then { INT k = 5;} else {INT j = 6;} ;', debug=False))
     ast = parse("INT k = 5; INT j = 2 + k;", debug= True)
     print(ast)
     evaluator = evaluator.Evaluator()
