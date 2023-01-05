@@ -158,17 +158,26 @@ class SemanticChecker:
 
     @visitor(ReceivingFromInput)
     def visit(self, node: ReceivingFromInput) -> bool:
-        # Verificar que la variable a la que se le asignará el valor ingresado por el usuario exista
-        if node.variable_name not in self.variables:
-            raise SemanticError(f"Variable {node.variable_name} not defined")
+         # Check that the variable has not already been defined
+        if node.variable_name in self.variables:
+            raise SemanticError(f"Variable {node.variable_name} already defined")
 
-        # Mark the flag as True to indicate that the program is receiving input
+        # Set the flag indicating that input was received
         self.receiving_from_input_found = True
 
-        return True
+        # Assign the variable the type "Number"
+        self.variables[node.variable_name] = Number
 
     @visitor(SendingToOutput)
     def visit(self, node: SendingToOutput) -> bool:
+        # Compute the type of the text to send
+        detected_type = self.visit(node.text_to_send)
+
+        # If the type is incorrect, return None
+        # (the error has already been reported by a previous method)
+        if detected_type is None:
+            return None
+        
         # Verificar que el texto a enviar sea una expresión válida
         if not isinstance(node.text_to_send, Expression):
             raise SemanticError("Invalid expression to send to output")
@@ -177,6 +186,13 @@ class SemanticChecker:
         self.sending_to_output_found = True
 
         return True
+    
+    def visit(self, node: GetVariableValue) -> Type:
+        # Check that the variable has been defined
+        try:
+            return self.variables[node.name]
+        except KeyError:  # Variable not found
+            raise SemanticError(f"Variable {node.name} not defined")
     
     @visitor(Grep)
     def visit_Grep(self, node: Grep):
@@ -221,6 +237,10 @@ class SemanticChecker:
         if source_type != 'WORD':
             self.add_error(f"Invalid source type for FIND: {source_type}")
 
+    @visitor(Number)
+    def visit(self, node: Number) -> Type:
+        # Return the type "Number"
+        return Number
     
     @visitor(BinaryOperation)
     def visit(self, node: BinaryOperation) -> Type:
