@@ -112,6 +112,7 @@ class Evaluator:
         if isinstance(range_or_iterable, Expression):
             range_or_iterable = self.visit(range_or_iterable)
         
+        #@TODO: ver lo del context
         # Por cada elemento en el rango o iterable
         for element in range_or_iterable:
             # Asignar el elemento a la variable del bucle
@@ -130,5 +131,4 @@ class Evaluator:
         # Implementa la lógica para evaluar un rango aquí
         start = self.visit(node.start)
         end = self.visit(node.end)
-        return range(int(start), int(end)+1)
-
+        return range(int(start, int(end)+1))

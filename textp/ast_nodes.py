@@ -110,6 +110,7 @@ class FunctionDefinition:
     name: str
     parameters: ParameterList
     statements: StatementList
+    return_type : Type
 
 @dataclass
 class FunctionDefinitionList:
