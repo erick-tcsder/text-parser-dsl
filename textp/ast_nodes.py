@@ -110,6 +110,7 @@ class FunctionDefinition:
     name: str
     parameters: ParameterList
     statements: StatementList
+    return_type : Type
 
 @dataclass
 class FunctionDefinitionList:
@@ -129,6 +130,11 @@ class ForLoop:
     loop_variable: str
     range: Union['Range', Expression]
     statements: StatementList
+
+@dataclass
+class VariableAssignment:
+    name: str
+    value: Expression
 
 @dataclass
 class ForeachLoop:

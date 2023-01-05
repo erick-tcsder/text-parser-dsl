@@ -73,13 +73,14 @@ tokens = [
     'NUMBER',
     'COMMA',
     'DOUBLE_DOT',
+    'COLON',
 ] + list(reserved.values())
 
 
 t_SEMICOLON = ';'
 t_COMMA = ','
 t_DOUBLE_DOT = '\.\.'
-
+t_COLON = ':'
 # region ExtraFirstOps
 #t_BARROW = r'->'
 # endregion

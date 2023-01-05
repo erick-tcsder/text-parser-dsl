@@ -33,18 +33,24 @@ def p_statement(p):
                  | function_definition
                  | for_loop
                  | foreach_loop
-                 | boolean_expression'''
+                 | expression'''
     p[0] = p[1]
 
 
 def p_assign(p):
-    '''assign : type ID ASSIGN expression'''
-    p[0] = ast_nodes.VariableDefinition(
-        _type = p[1],
-        name = p[2],
-        value = p[4]        
-    )
-    print(p[0].name)
+    '''assign : type ID ASSIGN expression
+              | ID ASSIGN expression'''
+    if len(p) == 5:  # Asignación con declaración de tipo
+        p[0] = ast_nodes.VariableDefinition(
+            _type=p[1],
+            name=p[2],
+            value=p[4]
+        )
+    else:  # Asignación sin declaración de tipo
+        p[0] = ast_nodes.VariableAssignment(
+            name=p[1],
+            value=p[3]
+        )
     
 
 def p_type(p):
@@ -78,61 +84,13 @@ def p_expression(p):
     '''expression : boolean_expression'''
     p[0] = p[1]
 
-# def p_grep(p):
-#     '''grep : GREP expression FROM WORD'''
-#     p[0] = ast_nodes.Grep(
-#         pattern=p[2],
-#         target=p[4]
-#     )
-
-# def p_select(p):
-#     '''select : SELECT expression FROM WORD DO statement_list'''
-#     p[0] = ast_nodes.Select(
-#         selection=p[2],
-#         source=p[4],
-#         statements=p[6]
-#     )
-
-# def p_each(p):
-#     '''each : EACH WORD FROM WORD DO statement_list'''
-#     p[0] = ast_nodes.Foreach(
-#         loop_variable=p[2],
-#         iterable=p[4],
-#         statements=p[6]
-#     )
-
-# def p_find(p):
-#     '''find : FIND expression FROM WORD'''
-#     p[0] = ast_nodes.Find(
-#         search=p[2],
-#         source=p[4]
-#     )
-
-
-
-# def p_regex_expression(p):
-#     '''regex_expression : GREP STRING_LITERAL FROM ID'''
-#     p[0] = ast_nodes.RegexExpression(
-#         pattern=p[2],
-#         target=p[4]
-#     )
-
-# def p_function_definition_list(p):
-#     '''function_definition_list : function_definition_list function_definition
-#                                 | empty'''
-#     if len(p) == 2:
-#         p[0] = ast_nodes.FunctionDefinitionList([])
-#     else:
-#         function_definition_list = p[1]
-#         function_definition = p[2]
-#         p[0] = function_definition_list.append(function_definition)
-
 def p_function_definition(p):
-    '''function_definition : DEF ID LPAREN parameter_list RPAREN COLON statement_list'''
+    '''function_definition : DEF type ID LPAREN parameter_list RPAREN LCURLY statement_list RCURLY'''
     p[0] = ast_nodes.FunctionDefinition(
-        name = p[2],
-        parameters = p[4],
-        statements = p[7]
+        name = p[3],
+        parameters = p[5],
+        statements = p[8],
+        return_type = p[2]
     )
 
 def p_parameter_list(p):
@@ -159,8 +117,8 @@ def p_if_statement(p):
     '''if_statement : IF expression THEN LCURLY statement_list RCURLY ELSE LCURLY statement_list RCURLY'''
     p[0] = ast_nodes.IFStatement(
         exp = p[2],
-        THENstatemet= p[4],
-        ELSEstatement = p[6]
+        THENstatemet= p[5],
+        ELSEstatement = p[9]
     )
 
 def p_boolean_expression(p):
@@ -203,7 +161,7 @@ def p_boolean_primary(p):
 
 def p_comparison(p):
     '''comparison : math_expression
-                  | expression comparison_operator math_expression'''
+                  | comparison comparison_operator math_expression'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -267,7 +225,6 @@ def p_factor(p):
     '''factor : NUMBER
               | ID
               | LPAREN math_expression RPAREN'''
-    print(p[0])
     if len(p) == 4:
         p[0] = p[3]
     elif utils.is_float(p[1]):
@@ -316,12 +273,14 @@ def parse(data, debug=False):
 
 
 if __name__ == '__main__':
-    #print(parse('def functi (INT a, INT b, INT c) : INT c=1; ;', debug=False))
+    print(parse('def INT functi (INT a, INT b, INT c) { INT c=1; } ;', debug=False))
     print()
     #print(parse('for i in 1..5: i >> DPOUT; ;', debug=False))
     print()
     #print(parse('foreach w in wordt: w >> DPOUT; ;', debug=False))
-    ast = parse("INT k = 5; INT j = 2 + k;", debug= True)
+    
+    #print(parse('if a > b then { INT k = 5;} else {INT j = 6;} ;', debug=False))
+    ast = parse("INT k = 5; for i in 1..2 { k = k + 5; INT j = 6;} ;", debug= False)
     print(ast)
     evaluator = evaluator.Evaluator()
     print(evaluator.visit(ast))
