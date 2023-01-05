@@ -38,13 +38,19 @@ def p_statement(p):
 
 
 def p_assign(p):
-    '''assign : type ID ASSIGN expression'''
-    p[0] = ast_nodes.VariableDefinition(
-        _type = p[1],
-        name = p[2],
-        value = p[4]        
-    )
-    print(p[0].name)
+    '''assign : type ID ASSIGN expression
+              | ID ASSIGN expression'''
+    if len(p) == 5:  # Asignación con declaración de tipo
+        p[0] = ast_nodes.VariableDefinition(
+            _type=p[1],
+            name=p[2],
+            value=p[4]
+        )
+    else:  # Asignación sin declaración de tipo
+        p[0] = ast_nodes.VariableAssignment(
+            name=p[1],
+            value=p[3]
+        )
     
 
 def p_type(p):
@@ -154,7 +160,7 @@ def p_boolean_primary(p):
 
 def p_comparison(p):
     '''comparison : math_expression
-                  | expression comparison_operator math_expression'''
+                  | comparison comparison_operator math_expression'''
     if len(p) == 2:
         p[0] = p[1]
     else:
@@ -218,7 +224,6 @@ def p_factor(p):
     '''factor : NUMBER
               | ID
               | LPAREN math_expression RPAREN'''
-    print(p[0])
     if len(p) == 4:
         p[0] = p[3]
     elif utils.is_float(p[1]):
@@ -273,8 +278,8 @@ if __name__ == '__main__':
     print()
     #print(parse('foreach w in wordt: w >> DPOUT; ;', debug=False))
     
-    print(parse('if a > b then { INT k = 5;} else {INT j = 6;} ;', debug=False))
-    ast = parse("INT k = 5; INT j = 2 + k;", debug= True)
+    #print(parse('if a > b then { INT k = 5;} else {INT j = 6;} ;', debug=False))
+    ast = parse("INT k = 5; for i in 1..2 { k = k + 5;} ;", debug= False)
     print(ast)
     evaluator = evaluator.Evaluator()
     print(evaluator.visit(ast))

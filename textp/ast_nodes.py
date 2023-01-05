@@ -131,6 +131,11 @@ class ForLoop:
     statements: StatementList
 
 @dataclass
+class VariableAssignment:
+    name: str
+    value: Expression
+
+@dataclass
 class ForeachLoop:
     loop_variable: str
     iterable: str

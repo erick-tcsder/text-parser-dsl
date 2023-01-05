@@ -102,3 +102,33 @@ class Evaluator:
             return exp1 <= exp2
         elif node.op == ">=":
             return exp1 >= exp2
+    
+    @visitor(ForLoop)
+    def visit(self, node: ForLoop):
+        # Evaluar la expresión de rango o iterable del bucle
+        range_or_iterable = self.visit(node.range)
+        
+        # Si el rango es una expresión, obtener el rango como una lista
+        if isinstance(range_or_iterable, Expression):
+            range_or_iterable = self.visit(range_or_iterable)
+        
+        # Por cada elemento en el rango o iterable
+        for element in range_or_iterable:
+            # Asignar el elemento a la variable del bucle
+            self.variables[node.loop_variable] = element
+            
+            # Evaluar la lista de declaraciones del cuerpo del bucle
+            self.visit(node.statements)
+            
+    @visitor(VariableAssignment)
+    def visit(self, node: VariableAssignment):
+        value = self.visit(node.value)
+        self.variables[node.name] = value
+    
+    @visitor(Range)
+    def visit(self, node: Range) -> Any:
+        # Implementa la lógica para evaluar un rango aquí
+        start = self.visit(node.start)
+        end = self.visit(node.end)
+        return range(int(start), int(end)+1)
+
