@@ -2,8 +2,9 @@ from visitor import visitor
 from ast_nodes import *
 import re
 
+
 class SemanticChecker:
-    def __init__(self):
+    def _init_(self):
         # flag to find SendingToOutput (DPOUT)
         self.sending_to_output_found = False
         # flag to find ReceivingFromInput (DPIN)
@@ -12,7 +13,7 @@ class SemanticChecker:
         # Lista de tipos definidas
         self.types = {"INT": Number}
         # Lista de funciones definidas
-        self.functions = {}  
+        self.functions = {}
         # Lista de variables definidos
         self.variables = {}
 
@@ -22,11 +23,11 @@ class SemanticChecker:
                           | empty'''
 
         # Comprueba que cada statement sea valido
-        for statement in statement_list.statements:            
+        for statement in statement_list.statements:
             if self.visit(statement) is None:
                 return False
         return True
-    
+
     @visitor(VariableDefinition)
     def visit_type(self, node):
         '''assign : type ID ASSIGN expression'''
@@ -68,7 +69,7 @@ class SemanticChecker:
 
         # Añadir la función al diccionario de funciones definidas
         self.functions[node.name] = node
-        return True       
+        return True
 
     @visitor(Parameter)
     def visit(self, node: Parameter) -> bool:
@@ -95,6 +96,108 @@ class SemanticChecker:
                 return False
         return True
 
+    @visitor(ReceivingFromInput)
+    def visit(self, node: ReceivingFromInput) -> bool:
+        # Verificar que la variable a la que se le asignará el valor ingresado por el usuario exista
+        if node.variable_name not in self.variables:
+            raise SemanticError(f"Variable {node.variable_name} not defined")
+
+        # Mark the flag as True to indicate that the program is receiving input
+        self.receiving_from_input_found = True
+
+        return True
+
+    @visitor(SendingToOutput)
+    def visit(self, node: SendingToOutput) -> bool:
+        # Verificar que el texto a enviar sea una expresión válida
+        if not isinstance(node.text_to_send, Expression):
+            raise SemanticError("Invalid expression to send to output")
+
+        # Establecer flag para indicar que se está enviando algo a la salida
+        self.sending_to_output_found = True
+
+        return True
+
+    @visitor(IFStatement)
+    def visit(self, node: IFStatement):
+        '''if_statement : IF expression THEN LCURLY statement_list RCURLY ELSE LCURLY statement_list RCURLY'''
+
+        exp_type = self.visit(node.exp)
+
+        # AQUI NO DEBE IR bool DEBE IR TU BOLEAN DEL LENGUAJE
+        # Verificamos la validez de la condición.
+        if exp_type is not bool:
+            raise SemanticError("Invalid condition")
+
+        if self.visit(node.THENstatemet) is None:
+            return None
+
+        if node.ELSEstatement is not None and self.visit(node.ELSEstatement) is None:
+            return None
+
+        return exp_type
+
+    @visitor(ORExp)
+    def visit(self, node: ORExp) -> bool:
+        # Verificamos si el nodo se corresponde con la primera producción
+        if node.term is None:
+            return self.visit(node.exp)
+
+        # En otro caso, se corresponde con la segunda
+        exp_type = self.visit(node.exp)
+        term_type = self.visit(node.term)
+
+        # Si alguna de las expresiones es erronea, devolvemos None
+        # (en este punto, el error ya fue reportado por un metodo anterior)
+        if exp_type is None or term_type is None:
+            return None
+
+        # AQUI NO DEBE IR bool DEBE IR TU BOLEAN DEL LENGUAJE
+        # Una expresión booliana es válida solo si se realiza entre valores boolianos
+        if exp_type == term_type and term_type is bool:
+            return exp_type
+
+        else:
+            raise SemanticError(f"Mismatch types in bool operation")
+
+    @visitor(ANDExp)
+    def visit(self, node: ANDExp) -> bool:
+        # Verificamos si el nodo se corresponde con la primera producción
+        if node.term is None:
+            return self.visit(node.term)
+
+        # En otro caso, se corresponde con la segunda
+        term_type = self.visit(node.term)
+        factor_type = self.visit(node.factor)
+
+        # Si alguna de las expresiones es erronea, devolvemos None
+        # (en este punto, el error ya fue reportado por un metodo anterior)
+        if term_type is None or factor_type is None:
+            return None
+
+        # AQUI NO DEBE IR bool DEBE IR TU BOLEAN DEL LENGUAJE
+        # Una expresión booliana es válida solo si se realiza entre valores boolianos
+        if term_type == factor_type and factor_type is bool:
+            return term_type
+
+        else:
+            raise SemanticError(f"Mismatch types in bool operation")
+
+    @visitor(NOTExp)
+    def visit(self, node: ANDExp) -> bool:
+        # En otro caso, se corresponde con la segunda
+        term_type = self.visit(node.term)
+
+        if term_type is None:
+            return None
+
+        # AQUI NO DEBE IR bool DEBE IR TU BOLEAN DEL LENGUAJE
+        # Una expresión booliana es válida solo si se realiza entre valores boolianos
+        if term_type is bool:
+            return term_type
+        else:
+            raise SemanticError(f"Invalid type in bool operation")
+
     @visitor(CMPExp)
     def visit(self, node: CMPExp):
         '''comparison : math_expression
@@ -120,7 +223,27 @@ class SemanticChecker:
         else:
             raise SemanticError(f"Mismatch types in comparison")
 
-        
+    @visitor(BinaryOperation)
+    def visit(self, node: BinaryOperation) -> Type:
+        # Compute the types of the left and right values
+        left_type = self.visit(node.left_value)
+        right_type = self.visit(node.right_value)
+
+        # If either of the types is incorrect, return None
+        # (the error has already been reported by a previous method)
+        if left_type is None or right_type is None:
+            return None
+
+        # Check that the types of the values match
+        if left_type != right_type:
+            raise SemanticError(f"Mismatch types in binary operation: {left_type} and {right_type}")
+
+        # Check that the operation is valid for the type
+        if left_type == Number and node.op in ['+', '-', '*', '/']:
+            return left_type
+        else:
+            raise SemanticError(f"Invalid operation for type {left_type}: {node.op}")
+
     @visitor(Factor)
     def visit(self, node: Factor):
         '''factor : NUMBER
@@ -156,47 +279,9 @@ class SemanticChecker:
         # En otro caso, se trata de la tercera producción
         return self.visit(node.exp)
 
-    @visitor(ReceivingFromInput)
-    def visit(self, node: ReceivingFromInput) -> bool:
-         # Check that the variable has not already been defined
-        if node.variable_name in self.variables:
-            raise SemanticError(f"Variable {node.variable_name} already defined")
-
-        # Set the flag indicating that input was received
-        self.receiving_from_input_found = True
-
-        # Assign the variable the type "Number"
-        self.variables[node.variable_name] = Number
-
-    @visitor(SendingToOutput)
-    def visit(self, node: SendingToOutput) -> bool:
-        # Compute the type of the text to send
-        detected_type = self.visit(node.text_to_send)
-
-        # If the type is incorrect, return None
-        # (the error has already been reported by a previous method)
-        if detected_type is None:
-            return None
-        
-        # Verificar que el texto a enviar sea una expresión válida
-        if not isinstance(node.text_to_send, Expression):
-            raise SemanticError("Invalid expression to send to output")
-
-        # Establecer flag para indicar que se está enviando algo a la salida
-        self.sending_to_output_found = True
-
-        return True
-    
-    def visit(self, node: GetVariableValue) -> Type:
-        # Check that the variable has been defined
-        try:
-            return self.variables[node.name]
-        except KeyError:  # Variable not found
-            raise SemanticError(f"Variable {node.name} not defined")
-    
     @visitor(Grep)
     def visit_Grep(self, node: Grep):
-    # Verificar que la expresión regular es válida
+        # Verificar que la expresión regular es válida
         try:
             re.compile(node.pattern)
         except re.error:
@@ -204,7 +289,7 @@ class SemanticChecker:
 
     @visitor(Select)
     def visit_Select(self, node: Select):
-    # Verificar que la expresión regular es válida
+        # Verificar que la expresión regular es válida
         try:
             re.compile(node.selection)
         except re.error:
@@ -218,7 +303,7 @@ class SemanticChecker:
 
     @visitor(Foreach)
     def visit_Foreach(self, node: Foreach):
-    # Verificar que la iterable es una lista
+        # Verificar que la iterable es una lista
         iterable_type = self.get_variable_type(node.iterable)
         if iterable_type != 'WORD[]':
             self.add_error(f"Invalid iterable type for EACH: {iterable_type}")
@@ -227,7 +312,7 @@ class SemanticChecker:
 
     @visitor(Find)
     def visit_Find(self, node: Find):
-    # Verificar que la expresión regular es válida
+        # Verificar que la expresión regular es válida
         try:
             re.compile(node.search)
         except re.error:
@@ -237,31 +322,6 @@ class SemanticChecker:
         if source_type != 'WORD':
             self.add_error(f"Invalid source type for FIND: {source_type}")
 
-    @visitor(Number)
-    def visit(self, node: Number) -> Type:
-        # Return the type "Number"
-        return Number
-    
-    @visitor(BinaryOperation)
-    def visit(self, node: BinaryOperation) -> Type:
-        # Compute the types of the left and right values
-        left_type = self.visit(node.left_value)
-        right_type = self.visit(node.right_value)
-
-        # If either of the types is incorrect, return None
-        # (the error has already been reported by a previous method)
-        if left_type is None or right_type is None:
-            return None
-
-        # Check that the types of the values match
-        if left_type != right_type:
-            raise SemanticError(f"Mismatch types in binary operation: {left_type} and {right_type}")
-
-        # Check that the operation is valid for the type
-        if left_type == Number and node.op in ['+', '-', '*', '/']:
-            return left_type
-        else:
-            raise SemanticError(f"Invalid operation for type {left_type}: {node.op}")
 class SemanticError(Exception):
-    def __init__(self, message: str):
+    def _init_(self, message: str):
         self.message = message
