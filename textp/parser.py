@@ -38,13 +38,22 @@ def p_statement(p):
 
 
 def p_assign(p):
-    '''assign : type ID ASSIGN expression'''
-    p[0] = ast_nodes.VariableDefinition(
-        _type = p[1],
-        name = p[2],
-        value = p[4]        
-    )
-    print(p[0].name)
+    '''assign : type ID ASSIGN expression
+              | type ID LBRACKET NUMBER RBRACKET ASSIGN LBRACKET values RBRACKET'''
+    if len(p) == 5:
+        p[0] = ast_nodes.VariableDefinition(
+            _type = p[1],
+            name = p[2],
+            value = p[4]        
+        )
+    else:
+        p[0] = ast_nodes.ArrayDefinition(
+            _type = p[1],
+            name = p[2],
+            size = int(p[4]),
+            values = p[8]
+        )
+    #print(p[0].name)
     
 
 def p_type(p):
@@ -274,6 +283,25 @@ def p_factor(p):
         p[0] = ast_nodes.Number(p[1])
     else:
         p[0]= ast_nodes.GetVariableValue(p[1])
+    
+
+def p_values(p):
+    '''values : value
+              | value COMMA values
+              | empty'''
+    if len(p) == 2:
+        p[0] = ast_nodes.Values([])
+    elif len(p) == 4:
+        values = p[3]
+        value = p[1]
+        p[0] = values.append(value)
+    else:
+        p[0] = p[1]
+
+def p_value(p):
+    '''value : expression'''
+    p[0] = p[1]
+
 
 def p_for_loop(p):
     '''for_loop : FOR ID IN range LCURLY statement_list RCURLY'''
@@ -321,7 +349,7 @@ if __name__ == '__main__':
     #print(parse('for i in 1..5: i >> DPOUT; ;', debug=False))
     print()
     #print(parse('foreach w in wordt: w >> DPOUT; ;', debug=False))
-    ast = parse("INT k = 5; INT j = 2 + k;", debug= True)
+    ast = parse("INT a [ 5 ] = [ 1 , 2, 3 , 4 , 5];", debug= False)
     print(ast)
     evaluator = evaluator.Evaluator()
     print(evaluator.visit(ast))

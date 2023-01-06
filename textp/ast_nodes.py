@@ -13,7 +13,26 @@ class VariableDefinition:
     _type: str
     name: str
     value: Expression
+
+@dataclass
+class Value:
+    _type: 'Type'
+    name: str
+
+@dataclass
+class Values:
+    values: List[Union['Number', Expression]]
     
+    def append(self, value: Value):
+        new_values = self.values + [value]
+        return Values(values = new_values)
+
+@dataclass
+class ArrayDefinition:
+    _type: str
+    name: str
+    size: 'Number'
+    values: Values
 @dataclass
 class BinaryOperation:
     left_value: Expression

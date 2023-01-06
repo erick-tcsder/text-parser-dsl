@@ -102,3 +102,29 @@ class Evaluator:
             return exp1 <= exp2
         elif node.op == ">=":
             return exp1 >= exp2
+    
+    @visitor(ArrayDefinition)
+    def visit(self, node: ArrayDefinition):
+        # obtener el tamaño del array
+        size = self.visit(node.size)
+        # crear el array con el tamaño especificado
+        array = [None] * size
+        # asignar cada valor del array
+        for i, value in enumerate(node.values):
+            array[i] = self.visit(value)
+        # guardar el array en el contexto actual
+        self.context.set_variable(node.name, array)
+
+    @visitor(Values)
+    def visit(self, node: Values):
+        # crear una lista para almacenar los valores
+        values = []
+        # obtener el valor de cada elemento y agregarlo a la lista
+        for value in node.values:
+            values.append(self.visit(value))
+        return values
+    
+    @visitor(Value)
+    def visit(self, node: Value):
+    # obtener el valor de la variable
+        return self.context.get_variable(node.name)
