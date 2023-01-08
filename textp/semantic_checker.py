@@ -1,10 +1,13 @@
 from visitor import visitor
 from ast_nodes import *
 import re
+from utils import Singleton
+
+# FIXME: Semantic Checker broken for architectural change
 
 
-class SemanticChecker:
-    def _init_(self):
+class SemanticChecker(Singleton):
+    def __init__(self):
         # flag to find SendingToOutput (DPOUT)
         self.sending_to_output_found = False
         # flag to find ReceivingFromInput (DPIN)
@@ -96,188 +99,65 @@ class SemanticChecker:
                 return False
         return True
 
-    @visitor(ReceivingFromInput)
-    def visit(self, node: ReceivingFromInput) -> bool:
-        # Verificar que la variable a la que se le asignará el valor ingresado por el usuario exista
-        if node.variable_name not in self.variables:
-            raise SemanticError(f"Variable {node.variable_name} not defined")
+    # @visitor(CMPExp)
+    # def visit(self, node: CMPExp):
+    #     '''comparison : math_expression
+    #                   | comparison comparison_operator math_expression'''
 
-        # Mark the flag as True to indicate that the program is receiving input
-        self.receiving_from_input_found = True
+    #     # Verificamos si el nodo se corresponde con la primera producción
+    #     if node.exp2 is None:
+    #         return self.visit(node.exp1)
 
-        return True
+    #     # En otro caso, se corresponde con la segunda
+    #     exp1_type = self.visit(node.exp1)
+    #     exp2_type = self.visit(node.exp2)
 
-    @visitor(SendingToOutput)
-    def visit(self, node: SendingToOutput) -> bool:
-        # Verificar que el texto a enviar sea una expresión válida
-        if not isinstance(node.text_to_send, Expression):
-            raise SemanticError("Invalid expression to send to output")
+    #     # Si alguna de las expresiones es erronea, devolvemos None
+    #     # (en este punto, el error ya fue reportado por un metodo anterior)
+    #     if exp1_type is None or exp2_type is None:
+    #         return None
 
-        # Establecer flag para indicar que se está enviando algo a la salida
-        self.sending_to_output_found = True
+    #     # Una comparación es válida solo si se comparan tipos iguales
+    #     if exp1_type == exp2_type:
+    #         return exp1_type
 
-        return True
+    #     else:
+    #         raise SemanticError(f"Mismatch types in comparison")
 
-    @visitor(IFStatement)
-    def visit(self, node: IFStatement):
-        '''if_statement : IF expression THEN LCURLY statement_list RCURLY ELSE LCURLY statement_list RCURLY'''
+    # @visitor(Factor)
+    # def visit(self, node: Factor):
+    #     '''factor : NUMBER
+    #               | ID
+    #               | LPAREN math_expression RPAREN'''
 
-        exp_type = self.visit(node.exp)
+    #     # NOTA: AST NODE FACTOR DEBE TENER TRES CAMPOS
+    #     # VALUE: SI EL FACTOR ES UN VALOR, EN TAL CASO, EL RESTO DE CAMPOS ESTARAN EN NONE
+    #     # NAME: SI ES UNA VARIABLE, EN TAL CASO, EL RESTO DE CAMPOS ESTARAN EN NONE
+    #     # EXP: SI ES UNA EXPRESION, EN TAL CASO, EL RESTO DE CAMPOS EN NONE
 
-        # AQUI NO DEBE IR bool DEBE IR TU BOLEAN DEL LENGUAJE
-        # Verificamos la validez de la condición.
-        if exp_type is not bool:
-            raise SemanticError("Invalid condition")
+    #     # SIEMPRE PUEDES EVITAR ESO, TENER UN SOLO CAMPO Y CASTEAR, PERO HABRAN CONFLICTOS
+    #     # POR EJEMPLO, CON LOS STRINGS Y LOS IDS.
+    #     # SI PONES UN PROTOCOLO PARA EVITAR CONFLICTOS (ENCERRAR LOS STRINGS ENTRE "" POR EJEMPLO)
+    #     # ENTONCES PUEDES TENER UN SOLO CAMPO Y RESOLVER CASTEANDO.
+    #     # EN ESE CASO, POR SUPUESTO, NADA DE PREGUNTAR SI ES NONE: PREGUNTAS SI ES UN STRING, Y EN QUE
+    #     # FORMATO, O SI ES UN EXPRESSION.
 
-        if self.visit(node.THENstatemet) is None:
-            return None
+    #     # Verificamos si el nodo se corresponde con la primera producción
+    #     if node.value is not None:
+    #         return Number
 
-        if node.ELSEstatement is not None and self.visit(node.ELSEstatement) is None:
-            return None
+    #     # Verificamos si el nodo se corresponde con la segunda producción
+    #     if node.name is not None:
+    #         # Verificamos que la variable esté declarada y, en ese caso,
+    #         # devolvemos el tipo de la variable
+    #         if node.name in self.variables:
+    #             return self.variables[node.name]
+    #         # En otro caso, devolvemos error
+    #         else:
+    #             raise SemanticError(f"Variable {node.name} doesn't exists")
 
-        return exp_type
-
-    @visitor(ORExp)
-    def visit(self, node: ORExp) -> bool:
-        # Verificamos si el nodo se corresponde con la primera producción
-        if node.term is None:
-            return self.visit(node.exp)
-
-        # En otro caso, se corresponde con la segunda
-        exp_type = self.visit(node.exp)
-        term_type = self.visit(node.term)
-
-        # Si alguna de las expresiones es erronea, devolvemos None
-        # (en este punto, el error ya fue reportado por un metodo anterior)
-        if exp_type is None or term_type is None:
-            return None
-
-        # AQUI NO DEBE IR bool DEBE IR TU BOLEAN DEL LENGUAJE
-        # Una expresión booliana es válida solo si se realiza entre valores boolianos
-        if exp_type == term_type and term_type is bool:
-            return exp_type
-
-        else:
-            raise SemanticError(f"Mismatch types in bool operation")
-
-    @visitor(ANDExp)
-    def visit(self, node: ANDExp) -> bool:
-        # Verificamos si el nodo se corresponde con la primera producción
-        if node.term is None:
-            return self.visit(node.term)
-
-        # En otro caso, se corresponde con la segunda
-        term_type = self.visit(node.term)
-        factor_type = self.visit(node.factor)
-
-        # Si alguna de las expresiones es erronea, devolvemos None
-        # (en este punto, el error ya fue reportado por un metodo anterior)
-        if term_type is None or factor_type is None:
-            return None
-
-        # AQUI NO DEBE IR bool DEBE IR TU BOLEAN DEL LENGUAJE
-        # Una expresión booliana es válida solo si se realiza entre valores boolianos
-        if term_type == factor_type and factor_type is bool:
-            return term_type
-
-        else:
-            raise SemanticError(f"Mismatch types in bool operation")
-
-    @visitor(NOTExp)
-    def visit(self, node: ANDExp) -> bool:
-        # En otro caso, se corresponde con la segunda
-        term_type = self.visit(node.term)
-
-        if term_type is None:
-            return None
-
-        # AQUI NO DEBE IR bool DEBE IR TU BOLEAN DEL LENGUAJE
-        # Una expresión booliana es válida solo si se realiza entre valores boolianos
-        if term_type is bool:
-            return term_type
-        else:
-            raise SemanticError(f"Invalid type in bool operation")
-
-    @visitor(CMPExp)
-    def visit(self, node: CMPExp):
-        '''comparison : math_expression
-                      | comparison comparison_operator math_expression'''
-
-        # Verificamos si el nodo se corresponde con la primera producción
-        if node.exp2 is None:
-            return self.visit(node.exp1)
-
-        # En otro caso, se corresponde con la segunda
-        exp1_type = self.visit(node.exp1)
-        exp2_type = self.visit(node.exp2)
-
-        # Si alguna de las expresiones es erronea, devolvemos None
-        # (en este punto, el error ya fue reportado por un metodo anterior)
-        if exp1_type is None or exp2_type is None:
-            return None
-
-        # Una comparación es válida solo si se comparan tipos iguales
-        if exp1_type == exp2_type:
-            return exp1_type
-
-        else:
-            raise SemanticError(f"Mismatch types in comparison")
-
-    @visitor(BinaryOperation)
-    def visit(self, node: BinaryOperation) -> Type:
-        # Compute the types of the left and right values
-        left_type = self.visit(node.left_value)
-        right_type = self.visit(node.right_value)
-
-        # If either of the types is incorrect, return None
-        # (the error has already been reported by a previous method)
-        if left_type is None or right_type is None:
-            return None
-
-        # Check that the types of the values match
-        if left_type != right_type:
-            raise SemanticError(f"Mismatch types in binary operation: {left_type} and {right_type}")
-
-        # Check that the operation is valid for the type
-        if left_type == Number and node.op in ['+', '-', '*', '/']:
-            return left_type
-        else:
-            raise SemanticError(f"Invalid operation for type {left_type}: {node.op}")
-
-    @visitor(Factor)
-    def visit(self, node: Factor):
-        '''factor : NUMBER
-                  | ID
-                  | LPAREN math_expression RPAREN'''
-
-        # NOTA: AST NODE FACTOR DEBE TENER TRES CAMPOS
-        # VALUE: SI EL FACTOR ES UN VALOR, EN TAL CASO, EL RESTO DE CAMPOS ESTARAN EN NONE
-        # NAME: SI ES UNA VARIABLE, EN TAL CASO, EL RESTO DE CAMPOS ESTARAN EN NONE
-        # EXP: SI ES UNA EXPRESION, EN TAL CASO, EL RESTO DE CAMPOS EN NONE
-
-        # SIEMPRE PUEDES EVITAR ESO, TENER UN SOLO CAMPO Y CASTEAR, PERO HABRAN CONFLICTOS
-        # POR EJEMPLO, CON LOS STRINGS Y LOS IDS.
-        # SI PONES UN PROTOCOLO PARA EVITAR CONFLICTOS (ENCERRAR LOS STRINGS ENTRE "" POR EJEMPLO)
-        # ENTONCES PUEDES TENER UN SOLO CAMPO Y RESOLVER CASTEANDO.
-        # EN ESE CASO, POR SUPUESTO, NADA DE PREGUNTAR SI ES NONE: PREGUNTAS SI ES UN STRING, Y EN QUE
-        # FORMATO, O SI ES UN EXPRESSION.
-
-        # Verificamos si el nodo se corresponde con la primera producción
-        if node.value is not None:
-            return Number
-
-        # Verificamos si el nodo se corresponde con la segunda producción
-        if node.name is not None:
-            # Verificamos que la variable esté declarada y, en ese caso,
-            # devolvemos el tipo de la variable
-            if node.name in self.variables:
-                return self.variables[node.name]
-            # En otro caso, devolvemos error
-            else:
-                raise SemanticError(f"Variable {node.name} doesn't exists")
-
-        # En otro caso, se trata de la tercera producción
-        return self.visit(node.exp)
+    #     # En otro caso, se trata de la tercera producción
+    #     return self.visit(node.exp)
 
     @visitor(Grep)
     def visit_Grep(self, node: Grep):
@@ -321,6 +201,33 @@ class SemanticChecker:
         source_type = self.get_variable_type(node.source)
         if source_type != 'WORD':
             self.add_error(f"Invalid source type for FIND: {source_type}")
+
+    # @visitor(Number)
+    # def visit(self, node: Number) -> Type:
+    #     # Return the type "Number"
+    #     return Number
+
+    # @visitor(BinaryOperation)
+    # def visit(self, node: BinaryOperation) -> Type:
+    #     # Compute the types of the left and right values
+    #     left_type = self.visit(node.left_value)
+    #     right_type = self.visit(node.right_value)
+
+    #     # If either of the types is incorrect, return None
+    #     # (the error has already been reported by a previous method)
+    #     if left_type is None or right_type is None:
+    #         return None
+
+    #     # Check that the types of the values match
+    #     if left_type != right_type:
+    #         raise SemanticError(f"Mismatch types in binary operation: {left_type} and {right_type}")
+
+    #     # Check that the operation is valid for the type
+    #     if left_type == Number and node.op in ['+', '-', '*', '/']:
+    #         return left_type
+    #     else:
+    #         raise SemanticError(f"Invalid operation for type {left_type}: {node.op}")
+
 
 class SemanticError(Exception):
     def _init_(self, message: str):

@@ -1,24 +1,5 @@
 from ply import lex
-
-reserved = {
-    'if': 'IF',
-    'then': 'THEN',
-    'else': 'ELSE',
-    'while': 'WHILE',
-    'greep': 'GREEP',
-    'select': 'SELECTOR',
-    'each': 'EACH',
-    'from': 'FROM',
-    'do': 'DO',
-    'find': 'FIND',
-    'regexp': 'REGEXP',
-    'filter': 'FILTER',
-    'word': 'WORD',
-    'for': 'FOR',
-    'foreach': 'FOREACH',
-    'in': 'IN',
-    'def': 'DEF',
-}
+from keywords import KEYWORDS as reserved
 
 tokens = [
     'SEMICOLON',
@@ -62,6 +43,8 @@ tokens = [
     'BNOT',
     # endregion
 
+    'QUOTE',
+
     'ASSIGN',
     'POINT',
 
@@ -69,12 +52,12 @@ tokens = [
 
     'DPIN',
     'DPOUT',
-    'TYPE',
-    'NUMBER',
+    'FLOAT',
+    'INT',
     'COMMA',
     'DOUBLE_DOT',
     'COLON',
-] + list(reserved.values())
+] + list(set(reserved.values()))
 
 
 t_SEMICOLON = ';'
@@ -116,7 +99,7 @@ t_DIVIDE = r'/'
 t_BAND = r'&'
 t_BOR = r'\|'
 # t_XOR = r'\^'
-t_BNOT = r'~'
+# t_BNOT = r'~'
 # endregion
 
 t_ASSIGN = r'='
@@ -139,11 +122,6 @@ def t_DPOUT(t):
     return t
 
 
-def t_TYPE(token):
-    r'INT|STRING|WORD'
-    return token
-
-
 def t_ID(t):
     r'[_a-zA-Z][_a-zA-Z0-9]*'
     t.type = reserved.get(t.value, 'ID')    # Check for reserved words
@@ -153,9 +131,15 @@ def t_ID(t):
 t_ignore = ' \t'
 
 
-def t_NUMBER(t):
-    r'\d+(.\d+)?'
+def t_FLOAT(t):
+    r'\d+\.\d+'
     t.value = float(t.value)
+    return t
+
+
+def t_INT(t):
+    r'\d+'
+    t.value = int(t.value)
     return t
 
 
