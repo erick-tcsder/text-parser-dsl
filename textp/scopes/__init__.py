@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 from typing_extensions import Self
+
+from bultin.types.commmon import DSLType
 
 
 @dataclass(slots=True)
@@ -12,28 +14,28 @@ class Scope:
     @property
     def isGlobal(self): return self.parent is None
 
-    def has_definition(self, id: str, local_only: bool = False) -> bool:
+    def hasdefinition(self, id: str, local_only: bool = False) -> bool:
         return id in self.variables or id in self.functions or (
             self.parent is
             not None and not local_only and self.parent.has_definition(id))
 
-    def has_variable(self, id: str, local_only: bool = False) -> bool:
+    def hasvariable(self, id: str, local_only: bool = False) -> bool:
         return id in self.variables or (
             self.parent is not None and
             not local_only and self.parent.has_variable(id))
 
-    def has_function(self, id: str, local_only: bool = False) -> bool:
+    def hasfunction(self, id: str, local_only: bool = False) -> bool:
         return id in self.functions or (
             self.parent is not None and
             not local_only and self.parent.has_function(id))
 
-    def getVariable(self, id: str, local_only: bool = False) -> Any:
+    def getvariable(self, id: str, local_only: bool = False) -> Any:
         v = self.variables.get(id, None)
         if not local_only and v is None and self.parent is not None:
             return self.parent.getVariable(id)
         return v
 
-    def getFunction(self, id: str, local_only: bool = False) -> Any:
+    def getfunction(self, id: str, parameters_types: Iterable[DSLType], local_only: bool = False) -> Any:
         v = self.functions.get(id, None)
         if not local_only and v is None and self.parent is not None:
             return self.parent.getFunction(id)
