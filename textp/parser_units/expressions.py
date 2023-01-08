@@ -104,6 +104,13 @@ def p_expression_function_param(p):
     )
 
 
+def p_expression_indexing(p):
+    '''expression : ID LBRACKET expression RBRACKET'''
+    p[0] = ast_nodes.IndexCall(
+        name=p[1],
+        arg=p[3]
+    )
+
 def p_values_single(p):
     '''values : expression'''
     p[0] = [p[1]]

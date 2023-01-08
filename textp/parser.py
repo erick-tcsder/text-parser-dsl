@@ -214,5 +214,5 @@ if __name__ == '__main__':
     # print(ast)
     # evaluator = evaluator.Evaluator()
     # ast = parse('( apply(5) * var / sign(-13.0,true) )+"ja";;')
-    ast = parse('def int[][] functi (int a,int b) { 5+6; };')
+    ast = parse('def int[][] functi (int a,int b) { 5+6; }; var[5+6];')
     print(ast)
