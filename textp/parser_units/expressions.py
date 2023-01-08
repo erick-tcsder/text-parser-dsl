@@ -1,5 +1,5 @@
 import ast_nodes
-from bultin.types import DSLFloat, DSLString, DSLBoolean, DSLInt
+from builtin.types import DSLFloat, DSLString, DSLBoolean, DSLInt
 from utils import is_float
 
 

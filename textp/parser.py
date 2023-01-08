@@ -5,6 +5,7 @@ import ast_nodes
 import utils
 # import evaluator
 from visitor import visitor
+import builtin.types as types
 
 
 tokens = lexer.tokens
@@ -33,7 +34,10 @@ def p_statement_list(p):
     if no_statement:
         p[0] = ast_nodes.StatementList([])
     else:
-        p[0] = ast_nodes.StatementList([p[1]]+p[3].statements)
+        if p[1] is None:
+            p[0] = p[3]
+        else:
+            p[0] = ast_nodes.StatementList([p[1]]+p[3].statements)
 
 
 def p_statement(p):
@@ -41,7 +45,8 @@ def p_statement(p):
                  | function_definition
                  | for_loop
                  | foreach_loop
-                 | expression'''
+                 | expression
+                 | empty'''
     p[0] = p[1]
 
 # TODO: Use expressions instead of directly numbers for arrays
@@ -69,14 +74,14 @@ def p_statement(p):
 #         )
 
 
-def p_type(p):
-    '''type : TYPE
-            | TYPE LBRACKET RBRACKET'''
-    simple_type = len(p) == 2
-    if simple_type:
-        p[0] = ast_nodes.Type(name=p[1])
-    else:
-        p[0] = ast_nodes.ListOfType(name=p[1])
+def p_type_simple(p):
+    '''type : TYPE'''
+    p[0] = types.TYPENAMES[p[1]]
+
+
+def p_type_array(p):
+    '''type : type LBRACKET RBRACKET'''
+    p[0] = types.get_array_type(p[1])
 
 
 def p_empty(p):
@@ -208,6 +213,6 @@ if __name__ == '__main__':
     # ast = parse("INT a [ 5 ] = [ 1 , 2, 3 , 4 , 5];", debug=False)
     # print(ast)
     # evaluator = evaluator.Evaluator()
-    ast = parse('( apply(5) * var / sign(-13.0,true) )+"ja";')
-
+    # ast = parse('( apply(5) * var / sign(-13.0,true) )+"ja";;')
+    ast = parse('def int[][] functi (int a,int b) { 5+6; };')
     print(ast)

@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Any, List, Union
 from dataclasses import dataclass
-from bultin.types.commmon import DSLType
+from builtin.types.commmon import DSLType
 from dsl_ast.expressions import *
 from dsl_ast.statements import *
 from dsl_ast.scope_calls import *

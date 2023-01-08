@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List
 from typing_extensions import Self
 
-from bultin.types.commmon import DSLType
+from builtin.types.commmon import DSLType
 from .common import ASTNode
 
 

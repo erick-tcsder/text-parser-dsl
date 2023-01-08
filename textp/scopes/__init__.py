@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable
 from typing_extensions import Self
 
-from bultin.types.commmon import DSLType
+from builtin.types.commmon import DSLType
 
 
 @dataclass(slots=True)

@@ -3,6 +3,7 @@ from .int import *
 from .string import *
 from .float import *
 from .bool import *
+from .array import *
 
 TYPENAMES = {}
 
