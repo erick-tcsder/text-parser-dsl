@@ -2,16 +2,8 @@ from abc import ABC
 from typing import Any, List, Union
 from dataclasses import dataclass
 from bultin.types.commmon import DSLType
-
-
-@dataclass
-class Expression(ABC):
-    pass
-
-
-@dataclass
-class Literal(Expression):
-    value: DSLType
+from dsl_ast.expressions import *
+from dsl_ast.statements import *
 
 
 @dataclass
@@ -27,24 +19,18 @@ class Values:
 
 
 @dataclass
+class IFStatement:
+    exp: Expression
+    THENstatemet: 'StatementList'
+    ELSEstatement: 'StatementList'
+
+
+@dataclass
 class ArrayDefinition:
     _type: str
     name: str
     size: 'Number'
     values: Values
-
-
-@dataclass
-class BinaryOperation(Expression):
-    left_value: Expression
-    right_value: Expression
-    op: str
-
-
-@dataclass
-class UnaryOperation(Expression):
-    value: Expression
-    op: str
 
 
 @dataclass
@@ -70,23 +56,6 @@ class ListOfType:
 @dataclass
 class GetVariableValue:
     name: str
-
-
-@dataclass
-class Statement:
-    pass
-
-
-@dataclass
-class IFStatement:
-    exp: Expression
-    THENstatemet: 'StatementList'
-    ELSEstatement: 'StatementList'
-
-
-@dataclass
-class StatementList:
-    statements: List[Statement]
 
 
 @dataclass
