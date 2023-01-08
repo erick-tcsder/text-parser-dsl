@@ -3,5 +3,9 @@ from .commmon import DSLType
 
 
 @dataclass(order=True, slots=True, unsafe_hash=True)
-class DSLBoolean:
+class DSLBoolean(DSLType):
     value: bool
+    
+    @staticmethod
+    def get_dsl_name() -> str:
+        return 'bool'
