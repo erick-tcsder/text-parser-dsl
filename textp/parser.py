@@ -38,8 +38,6 @@ def p_statement_list(p):
 
 def p_statement(p):
     '''statement : if_statement
-                 | input
-                 | output
                  | function_definition
                  | for_loop
                  | foreach_loop
@@ -84,19 +82,19 @@ def p_type(p):
 def p_empty(p):
     '''empty : '''
 
+# TODO: Change syntax to avoid DPOUT shift/reduce conflict
+# def p_input(p):
+#     '''input : DPIN GR GR ID'''
+#     p[0] = ast_nodes.ReceivingFromInput(
+#         variable_name=p[4]
+#     )
 
-def p_input(p):
-    '''input : DPIN GR GR ID'''
-    p[0] = ast_nodes.ReceivingFromInput(
-        variable_name=p[4]
-    )
 
-
-def p_output(p):
-    '''output : ID GR GR DPOUT'''
-    p[0] = ast_nodes.SendingToOutput(
-        text_to_send=p[1]
-    )
+# def p_output(p):
+#     '''output : ID GR GR DPOUT'''
+#     p[0] = ast_nodes.SendingToOutput(
+#         text_to_send=p[1]
+#     )
 
 
 def p_function_definition(p):
@@ -210,4 +208,6 @@ if __name__ == '__main__':
     # ast = parse("INT a [ 5 ] = [ 1 , 2, 3 , 4 , 5];", debug=False)
     # print(ast)
     # evaluator = evaluator.Evaluator()
-    ast = parse('( 5 * 6 / - 13.0 )+"ja";')
+    ast = parse('( apply(5) * var / sign(-13.0,true) )+"ja";')
+
+    print(ast)

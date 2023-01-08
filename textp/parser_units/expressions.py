@@ -79,3 +79,36 @@ def p_expression_literal_bool(p):
 def p_expression_capsule(p):
     '''expression : LPAREN expression RPAREN'''
     p[0] = p[2]
+
+
+def p_expression_variable(p):
+    '''expression : ID'''
+    p[0] = ast_nodes.VariableCall(
+        name=p[1]
+    )
+
+
+def p_expression_function_simple(p):
+    '''expression : ID LPAREN RPAREN'''
+    p[0] = ast_nodes.FunctionCall(
+        name=p[1],
+        args=[]
+    )
+
+
+def p_expression_function_param(p):
+    '''expression : ID LPAREN values RPAREN'''
+    p[0] = ast_nodes.FunctionCall(
+        name=p[1],
+        args=p[3]
+    )
+
+
+def p_values_single(p):
+    '''values : expression'''
+    p[0] = [p[1]]
+
+
+def p_values_multi(p):
+    '''values : expression COMMA values'''
+    p[0] = [p[1]]+p[3]

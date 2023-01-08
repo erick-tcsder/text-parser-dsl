@@ -10,7 +10,7 @@ class Statement(ASTNode):
     pass
 
 
-@dataclass
+@dataclass(slots=True)
 class StatementList(ASTNode):
     statements: List[Statement]
 
