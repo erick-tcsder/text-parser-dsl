@@ -13,38 +13,38 @@ class Expression(ASTNode):
     pass
 
 
-@dataclass
+@dataclass(slots=True)
 class Literal(Expression):
     value: DSLType
 
-    def get_childs(self) -> List[Expression]:
+    def get_children(self) -> List[Expression]:
         return []
 
-    def set_childs(self, childs: List[Expression]):
+    def set_children(self, childs: List[Expression]):
         pass
 
 
-@dataclass
+@dataclass(slots=True)
 class BinaryOperation(Expression):
     left_value: Expression
     right_value: Expression
     op: str
 
-    def get_childs(self) -> List[Expression]:
+    def get_children(self) -> List[Expression]:
         return [self.left_value, self.right_value]
 
-    def set_childs(self, childs: List[Expression]):
+    def set_children(self, childs: List[Expression]):
         self.left_value = childs[0]
         self.right_value = childs[1]
 
 
-@dataclass
+@dataclass(slots=True)
 class UnaryOperation(Expression):
     value: Expression
     op: str
 
-    def get_childs(self) -> List[Expression]:
+    def get_children(self) -> List[Expression]:
         return [self.value]
 
-    def set_childs(self, childs: List[Expression]):
+    def set_children(self, childs: List[Expression]):
         self.value = childs[0]

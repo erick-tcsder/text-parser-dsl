@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from typing import Any, Callable, List
+from typing import Any, Callable, Iterable
 from bultin.types import DSLType
 
 
 @dataclass(slots=True)
 class FunctionDefinition:
     name: str
-    param_types: List[DSLType]
+    param_types: Iterable[DSLType]
     return_type: DSLType
 
 

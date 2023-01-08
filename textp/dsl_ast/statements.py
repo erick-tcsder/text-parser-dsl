@@ -14,8 +14,8 @@ class Statement(ASTNode):
 class StatementList(ASTNode):
     statements: List[Statement]
 
-    def get_childs(self) -> List[Statement]:
+    def get_children(self) -> List[Statement]:
         return self.statements
 
-    def set_childs(self, childs: List[Statement]):
+    def set_children(self, childs: List[Statement]):
         self.statements = childs
