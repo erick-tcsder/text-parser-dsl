@@ -10,9 +10,7 @@ from .common import ASTNode
 
 @dataclass
 class Expression(ASTNode):
-    @abstractmethod
-    def get_childs(self) -> List[Self]:
-        pass
+    pass
 
 
 @dataclass
@@ -21,6 +19,9 @@ class Literal(Expression):
 
     def get_childs(self) -> List[Expression]:
         return []
+
+    def set_childs(self, childs: List[Expression]):
+        pass
 
 
 @dataclass
@@ -32,6 +33,10 @@ class BinaryOperation(Expression):
     def get_childs(self) -> List[Expression]:
         return [self.left_value, self.right_value]
 
+    def set_childs(self, childs: List[Expression]):
+        self.left_value = childs[0]
+        self.right_value = childs[1]
+
 
 @dataclass
 class UnaryOperation(Expression):
@@ -40,3 +45,6 @@ class UnaryOperation(Expression):
 
     def get_childs(self) -> List[Expression]:
         return [self.value]
+
+    def set_childs(self, childs: List[Expression]):
+        self.value = childs[0]

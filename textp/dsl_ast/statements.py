@@ -7,14 +7,15 @@ from .common import ASTNode
 
 
 class Statement(ASTNode):
-    @abstractmethod
-    def get_childs(self) -> List[ASTNode]:
-        pass
+    pass
 
 
 @dataclass
-class StatementList:
+class StatementList(ASTNode):
     statements: List[Statement]
 
     def get_childs(self) -> List[Statement]:
         return self.statements
+
+    def set_childs(self, childs: List[Statement]):
+        self.statements = childs
