@@ -134,3 +134,10 @@ def p_expression_variable(p):
     p[0] = ast_nodes.VariableCall(
         name=p[1]
     )
+
+
+def p_expression_literal_array(p):
+    '''expression : LBRACKET values RBRACKET'''
+    p[0] = ast_nodes.LiteralArray(
+        values=p[2]
+    )
