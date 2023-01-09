@@ -16,10 +16,10 @@ tokens = lexer.tokens
 
 precedence = (
     ('right', 'ASSIGN'),
-    ('left', 'BOR', 'BAND'),
+    ('left', 'OR', 'AND'),
     ('left', 'EQ', 'NEQ', 'GR', 'LS', 'GEQ', 'LEQ'),
-    ('left', 'PLUS', 'MINUS'),
-    ('left', 'TIMES', 'DIVIDE'),
+    ('left', 'ADD', 'MINUS'),
+    ('left', 'MULT', 'DIVIDE'),
     ('right', 'UMINUS'),             # Unary
     ('right', 'NOT'),               # Unary
 )
@@ -30,30 +30,6 @@ start = 'program'
 def p_program(p):
     '''program : statement_list'''
     p[0] = p[1]
-
-# TODO: Use expressions instead of directly numbers for arrays
-# def p_assign(p):
-#     '''assign : type ID ASSIGN expression
-#               | ID ASSIGN expression
-#               | type ID LBRACKET NUMBER RBRACKET ASSIGN LBRACKET values RBRACKET'''
-#     if len(p) == 5:  # Asignación con declaración de tipo
-#         p[0] = ast_nodes.VariableDefinition(
-#             _type=p[1],
-#             name=p[2],
-#             value=p[4]
-#         )
-#     elif len(p) == 4:  # Asignación sin declaración de tipo
-#         p[0] = ast_nodes.VariableAssignment(
-#             name=p[1],
-#             value=p[3]
-#         )
-#     else:
-#         p[0] = ast_nodes.ArrayDefinition(
-#             _type=p[1],
-#             name=p[2],
-#             size=int(p[4]),
-#             values=p[8]
-#         )
 
 
 def p_empty(p):

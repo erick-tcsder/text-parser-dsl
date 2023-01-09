@@ -25,37 +25,12 @@ class Literal(Expression):
 
 
 @dataclass(slots=True)
-class BinaryOperation(Expression):
-    left_value: Expression
-    right_value: Expression
-    op: str
-
-    def get_children(self) -> List[Expression]:
-        return [self.left_value, self.right_value]
-
-    def set_children(self, childs: List[Expression]):
-        self.left_value = childs[0]
-        self.right_value = childs[1]
-
-
-@dataclass(slots=True)
-class UnaryOperation(Expression):
-    value: Expression
-    op: str
-
-    def get_children(self) -> List[Expression]:
-        return [self.value]
-
-    def set_children(self, childs: List[Expression]):
-        self.value = childs[0]
-
-@dataclass(slots=True)
 class VariableAssign(Expression):
-    name:str
+    name: str
     value: Expression
-    
+
     def get_children(self) -> List[Expression]:
         return [self.value]
-    
+
     def set_children(self, children: List[Expression]):
-        self.value=children[0]
+        self.value = children[0]

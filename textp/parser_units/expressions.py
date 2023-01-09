@@ -4,47 +4,49 @@ from utils import is_float
 
 
 def p_expression_bool(p):
-    '''expression : expression BOR expression
-                  | expression BAND expression
+    '''expression : expression OR expression
+                  | expression AND expression
                   | expression EQ expression
                   | expression NEQ expression
                   | expression GR expression
                   | expression LS expression
                   | expression GEQ expression
                   | expression LEQ expression'''
-    p[0] = ast_nodes.BinaryOperation(
-        left_value=p[1],
-        right_value=p[3],
-        op=p[2],
+    call = ast_nodes.FunctionCall(
+        name=f'__{p.slice[2].type.lower()}',
+        args=[p[1], p[3]]
     )
+    p[0] = call
 
 
 def p_expression_math(p):
-    '''expression : expression PLUS expression
+    '''expression : expression ADD expression
                   | expression MINUS expression
-                  | expression TIMES expression
+                  | expression MULT expression
                   | expression DIVIDE expression'''
-    p[0] = ast_nodes.BinaryOperation(
-        left_value=p[1],
-        right_value=p[3],
-        op=p[2],
+    call = ast_nodes.FunctionCall(
+        name=f'__{p.slice[2].type.lower()}',
+        args=[p[1], p[3]]
     )
+    p[0] = call
 
 
 def p_expression_unary_bool(p):
     '''expression : NOT expression'''
-    p[0] = ast_nodes.UnaryOperation(
-        value=p[2],
-        op=p[1],
+    call = ast_nodes.FunctionCall(
+        name=f'__{p.slice[1].type.lower()}',
+        args=[p[2]]
     )
+    p[0] = call
 
 
 def p_expression_unary_math(p):
     '''expression : MINUS expression %prec UMINUS'''
-    p[0] = ast_nodes.UnaryOperation(
-        value=p[2],
-        op=p[1],
+    call = ast_nodes.FunctionCall(
+        name='__neg',
+        args=[p[2]]
     )
+    p[0] = call
 
 
 def p_expression_literal_float(p):

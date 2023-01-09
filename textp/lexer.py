@@ -9,6 +9,8 @@ tokens = [
     # endregion
 
     # region ConditionalsNames
+    'AND',
+    'OR',
     'EQ',
     'NEQ',
     'GR',
@@ -30,17 +32,10 @@ tokens = [
     'ID',  # Standard id
 
     # region ArithmeticNames
-    'PLUS',
+    'ADD',
     'MINUS',
-    'TIMES',
+    'MULT',
     'DIVIDE',
-    # endregion
-
-    # region BitNames
-    'BAND',
-    'BOR',
-    'BXOR',
-    'BNOT',
     # endregion
 
     'QUOTE',
@@ -70,6 +65,8 @@ t_COLON = ':'
 # endregion
 
 # region Conditionals
+t_AND = r'&'
+t_OR = r'\|'
 t_EQ = '=='
 t_NEQ = '!='
 t_GR = '>'
@@ -89,17 +86,10 @@ t_RPAREN = r'\)'
 # endregion
 
 # region Arithmetic
-t_PLUS = r'\+'
+t_ADD = r'\+'
 t_MINUS = r'-'
-t_TIMES = r'\*'
+t_MULT = r'\*'
 t_DIVIDE = r'/'
-# endregion
-
-# region Bit
-t_BAND = r'&'
-t_BOR = r'\|'
-# t_XOR = r'\^'
-# t_BNOT = r'~'
 # endregion
 
 t_ASSIGN = r'='
