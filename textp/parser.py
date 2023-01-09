@@ -1,4 +1,8 @@
 from parser_units.expressions import *
+from parser_units.statements import *
+from parser_units.control import *
+from parser_units.typing import *
+from parser_units.definitions import *
 from ply import *
 import lexer
 import ast_nodes
@@ -11,6 +15,7 @@ import builtin.types as types
 tokens = lexer.tokens
 
 precedence = (
+    ('right', 'ASSIGN'),
     ('left', 'BOR', 'BAND'),
     ('left', 'EQ', 'NEQ', 'GR', 'LS', 'GEQ', 'LEQ'),
     ('left', 'PLUS', 'MINUS'),
@@ -24,29 +29,6 @@ start = 'program'
 
 def p_program(p):
     '''program : statement_list'''
-    p[0] = p[1]
-
-
-def p_statement_list(p):
-    '''statement_list : statement SEMICOLON statement_list
-                      | empty'''
-    no_statement = len(p) == 2
-    if no_statement:
-        p[0] = ast_nodes.StatementList([])
-    else:
-        if p[1] is None:
-            p[0] = p[3]
-        else:
-            p[0] = ast_nodes.StatementList([p[1]]+p[3].statements)
-
-
-def p_statement(p):
-    '''statement : if_statement
-                 | function_definition
-                 | for_loop
-                 | foreach_loop
-                 | expression
-                 | empty'''
     p[0] = p[1]
 
 # TODO: Use expressions instead of directly numbers for arrays
@@ -74,16 +56,6 @@ def p_statement(p):
 #         )
 
 
-def p_type_simple(p):
-    '''type : TYPE'''
-    p[0] = types.TYPENAMES[p[1]]
-
-
-def p_type_array(p):
-    '''type : type LBRACKET RBRACKET'''
-    p[0] = types.get_array_type(p[1])
-
-
 def p_empty(p):
     '''empty : '''
 
@@ -100,89 +72,6 @@ def p_empty(p):
 #     p[0] = ast_nodes.SendingToOutput(
 #         text_to_send=p[1]
 #     )
-
-
-def p_function_definition(p):
-    '''function_definition : DEF type ID LPAREN parameter_list RPAREN LCURLY statement_list RCURLY'''
-    p[0] = ast_nodes.FunctionDefinition(
-        name=p[3],
-        parameters=p[5],
-        statements=p[8],
-        return_type=p[2]
-    )
-
-
-def p_parameter_list(p):
-    '''parameter_list : parameter_list COMMA parameter
-                      | parameter
-                      | empty'''
-    if len(p) == 2:
-        p[0] = ast_nodes.ParameterList([])
-    elif len(p) == 4:
-        parameter_list = p[1]
-        parameter = p[3]
-        p[0] = parameter_list.append(parameter)
-    else:
-        p[0] = p[1]
-
-
-def p_parameter(p):
-    '''parameter : type ID'''
-    p[0] = ast_nodes.Parameter(
-        _type=p[1],
-        name=p[2]
-    )
-
-
-def p_if_statement(p):
-    '''if_statement : IF expression THEN LCURLY statement_list RCURLY ELSE LCURLY statement_list RCURLY'''
-    p[0] = ast_nodes.IFStatement(
-        exp=p[2],
-        THENstatemet=p[5],
-        ELSEstatement=p[9]
-    )
-
-
-# def p_values(p):
-#     '''values : expression
-#               | expression COMMA values'''
-#     f = ast_nodes.Values([p[1]])
-#     if len(p) == 2:
-#         p[0] = f
-#     else:
-#         p[0] = f.extend(p[3])
-
-
-# def p_values_empty(p):
-#     '''values : empty'''
-#     p[0] = ast_nodes.Values([])
-
-
-def p_for_loop(p):
-    '''for_loop : FOR ID IN range LCURLY statement_list RCURLY'''
-    p[0] = ast_nodes.ForLoop(
-        loop_variable=p[2],
-        range=p[4],
-        statements=p[6]
-    )
-
-
-def p_foreach_loop(p):
-    '''foreach_loop : FOREACH ID IN ID LCURLY statement_list RCURLY'''
-    p[0] = ast_nodes.ForeachLoop(
-        loop_variable=p[2],
-        iterable=p[4],
-        statements=p[6]
-    )
-
-
-def p_range(p):
-    '''range : expression DOUBLE_DOT expression
-             | expression'''
-    if len(p) == 4:
-        p[0] = ast_nodes.Range(start=p[1], end=p[3])
-    else:
-        p[0] = ast_nodes.Range(start=p[1])
 
 
 def p_error(t):
@@ -214,5 +103,23 @@ if __name__ == '__main__':
     # print(ast)
     # evaluator = evaluator.Evaluator()
     # ast = parse('( apply(5) * var / sign(-13.0,true) )+"ja";;')
-    ast = parse('def int[][] functi (int a,int b) { 5+6; }; var[5+6];')
+    ast = parse('''int[][] functi (int a,int b) { 
+                        5+6; 
+                    };
+                    
+                    foreach v in values {
+                        string vaca = "vaca muu";
+                        vaca = st = 34 / 2;
+                        return 6;
+                    }; 
+                    
+                    while(true) {
+                        if false | true {
+                            break;
+                        } else {
+                            if (false) {
+                                continue;
+                            };
+                        };
+                    };''')
     print(ast)

@@ -13,8 +13,8 @@ def p_expression_bool(p):
                   | expression GEQ expression
                   | expression LEQ expression'''
     p[0] = ast_nodes.BinaryOperation(
-        exp1=p[1],
-        exp2=p[3],
+        left_value=p[1],
+        right_value=p[3],
         op=p[2],
     )
 
@@ -72,20 +72,13 @@ def p_expression_literal_bool(p):
     '''expression : TRUE
                   | FALSE'''
     p[0] = ast_nodes.Literal(
-        value=DSLBoolean(bool(p[1]))
+        value=DSLBoolean(True if p[1] == 'true' else False)
     )
 
 
 def p_expression_capsule(p):
     '''expression : LPAREN expression RPAREN'''
     p[0] = p[2]
-
-
-def p_expression_variable(p):
-    '''expression : ID'''
-    p[0] = ast_nodes.VariableCall(
-        name=p[1]
-    )
 
 
 def p_expression_function_simple(p):
@@ -119,3 +112,23 @@ def p_values_single(p):
 def p_values_multi(p):
     '''values : expression COMMA values'''
     p[0] = [p[1]]+p[3]
+
+
+def p_expression_assign(p):
+    '''expression : assign'''
+    p[0] = p[1]
+
+
+def p_assign(p):
+    '''assign : ID ASSIGN expression'''
+    p[0] = ast_nodes.VariableAssign(
+        name=p[1],
+        value=p[3]
+    )
+
+
+def p_expression_variable(p):
+    '''expression : ID'''
+    p[0] = ast_nodes.VariableCall(
+        name=p[1]
+    )

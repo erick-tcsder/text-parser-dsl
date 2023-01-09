@@ -2,14 +2,12 @@ from builtin.types import TYPENAMES
 
 KEYWORDS = {
     'if': 'IF',
-    'then': 'THEN',
     'else': 'ELSE',
     'while': 'WHILE',
     'greep': 'GREEP',
     'select': 'SELECTOR',
     'each': 'EACH',
     'from': 'FROM',
-    'do': 'DO',
     'find': 'FIND',
     'regexp': 'REGEXP',
     'filter': 'FILTER',
@@ -20,6 +18,9 @@ KEYWORDS = {
     'def': 'DEF',
     'true': 'TRUE',
     'false': 'FALSE',
+    'break': 'BREAK',
+    'continue': 'CONTINUE',
+    'return': 'RETURN'
 }
 
 KEYWORDS.update(

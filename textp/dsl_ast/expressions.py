@@ -48,3 +48,14 @@ class UnaryOperation(Expression):
 
     def set_children(self, childs: List[Expression]):
         self.value = childs[0]
+
+@dataclass(slots=True)
+class VariableAssign(Expression):
+    name:str
+    value: Expression
+    
+    def get_children(self) -> List[Expression]:
+        return [self.value]
+    
+    def set_children(self, children: List[Expression]):
+        self.value=children[0]
