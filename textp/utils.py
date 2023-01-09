@@ -6,7 +6,7 @@ def is_float(anything):
         return False
 
 
-class Singleton():
+class Singleton(type):
     _instances = {}
 
     def __call__(cls, *args, **kwargs):

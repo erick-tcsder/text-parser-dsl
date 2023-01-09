@@ -3,6 +3,7 @@ from parser_units.statements import *
 from parser_units.control import *
 from parser_units.typing import *
 from parser_units.definitions import *
+from semmantics.type_check import TypeCheck
 from ply import *
 import lexer
 import ast_nodes
@@ -29,7 +30,7 @@ start = 'program'
 
 def p_program(p):
     '''program : statement_list'''
-    p[0] = p[1]
+    p[0] = ast_nodes.Program(p[1])
 
 
 def p_empty(p):
@@ -98,4 +99,5 @@ if __name__ == '__main__':
                             };
                         };
                     };''')
-    print(ast)
+    TypeCheck().visit(ast)
+    print(f'Literals: {TypeCheck().literal_count}')

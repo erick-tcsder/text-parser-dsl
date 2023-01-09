@@ -47,4 +47,15 @@ class Return(ASTNode):
         return [self.value]
 
     def set_children(self, children: List[Expression]):
-        self.value=children[0]
+        self.value = children[0]
+
+
+@dataclass(slots=True)
+class Program(ASTNode):
+    statements: StatementList
+
+    def get_children(self) -> List[StatementList]:
+        return [self.statements]
+
+    def set_children(self, children: List[StatementList]):
+        self.statements = children[0]

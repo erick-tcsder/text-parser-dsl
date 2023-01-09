@@ -5,11 +5,11 @@ from typing_extensions import Self
 from builtin.types.commmon import DSLType
 
 
-@dataclass(slots=True)
+@dataclass()
 class Scope:
     parent: Self | None = None
-    variables: Dict[str, Any] = {}
-    functions: Dict[str, Any] = {}
+    variables = {}
+    functions = {}
 
     @property
     def isGlobal(self): return self.parent is None

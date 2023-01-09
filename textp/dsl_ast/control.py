@@ -15,12 +15,12 @@ class IfStatement(ASTNode):
     else_code: StatementList | None = None
 
     def get_children(self) -> List[ASTNode]:
-        return [self.condition, self.then_code, self.else_code]
+        return [self.condition, self.then_code] + ([self.else_code] if self.else_code is not None else [])
 
     def set_children(self, children: List[ASTNode]):
         self.condition = children[0]
         self.then_code = children[1]
-        self.else_code = children[2]
+        self.else_code = children[2] if len(children) >= 3 else None
 
 
 @dataclass(slots=True)
