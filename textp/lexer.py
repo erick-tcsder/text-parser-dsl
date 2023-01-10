@@ -3,6 +3,7 @@ from keywords import KEYWORDS as reserved
 
 tokens = [
     'SEMICOLON',
+    'LEN',
 
     # region ExtraFirstOpsNames
     'BARROW',
@@ -59,6 +60,7 @@ t_SEMICOLON = ';'
 t_COMMA = ','
 t_DOUBLE_DOT = '\.\.'
 t_COLON = ':'
+t_LEN = '#'
 
 # region ExtraFirstOps
 # t_BARROW = r'->'
@@ -141,11 +143,6 @@ def t_IN(t):
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
-
-
-def t_error(t):
-    print("Illegal character %s" % t.value[0])
-    t.lexer.skip(1)
 
 
 # construye el lexer

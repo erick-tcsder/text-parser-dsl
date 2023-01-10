@@ -38,6 +38,15 @@ def p_expression_unary_bool(p):
         args=[p[2]]
     )
     p[0] = call
+    
+
+def p_expression_unary_bool(p):
+    '''expression : LEN expression'''
+    call = ast_nodes.FunctionCall(
+        name=f'__len',
+        args=[p[2]]
+    )
+    p[0] = call
 
 
 def p_expression_unary_math(p):
@@ -101,9 +110,9 @@ def p_expression_function_param(p):
 
 def p_expression_indexing(p):
     '''expression : ID LBRACKET expression RBRACKET'''
-    p[0] = ast_nodes.IndexCall(
-        name=p[1],
-        arg=p[3]
+    p[0] = ast_nodes.FunctionCall(
+        name='__index',
+        args=[p[1], p[3]]
     )
 
 def p_values_single(p):

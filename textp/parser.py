@@ -21,7 +21,8 @@ precedence = (
     ('left', 'EQ', 'NEQ', 'GR', 'LS', 'GEQ', 'LEQ'),
     ('left', 'ADD', 'MINUS'),
     ('left', 'MULT', 'DIVIDE'),
-    ('right', 'UMINUS'),             # Unary
+    ('right', 'LEN'),               # Unary
+    ('right', 'UMINUS'),            # Unary
     ('right', 'NOT'),               # Unary
 )
 
@@ -58,6 +59,7 @@ def p_error(t, *args, **kwargs):
     print(f"Syntax error. line:{t.lexer.lineno} Unexpected character {t.value}")
     skip_step = t.lexer.lexdata[t.lexer.lexpos+1:].find(';')
     t.lexer.skip(skip_step)
+    parser.error = True
 
 
 parser = yacc.yacc()
@@ -67,7 +69,7 @@ def parse(data, debug=True):
     parser.error = 0
     p = parser.parse(data, debug=debug)
     if parser.error:
-        return None
+        raise Exception("Syntax error at parsing")
     return p
 
 
@@ -85,7 +87,7 @@ if __name__ == '__main__':
     # evaluator = evaluator.Evaluator()
     # ast = parse('( apply(5) * var / sign(-13.0,true) )+"ja";;')
     ast = parse('''int[] functi (int a) { 
-                        return [a]; 
+                        return [a+$3$]; 
                     };
                     
                     int[] test = [1,2,3];
@@ -96,7 +98,7 @@ if __name__ == '__main__':
                     
                     while(true) {
                         if false{
-                            break
+                            break;
                         } else {
                             if (false) {
                                 continue;
