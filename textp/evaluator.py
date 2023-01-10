@@ -1,10 +1,10 @@
-from scopes import Scope
-from ast_nodes import *
-from utils import Singleton
-from visitor import visitor
-from keywords import KEYWORDS
-from builtin.functions.definition import BuiltinFunctionDef
-from builtin.types import DSLBoolean, DSLType, get_array_type
+from .scopes import Scope
+from .ast_nodes import *
+from .utils import Singleton
+from .visitor import visitor
+from .keywords import KEYWORDS
+from .builtin.functions.definition import BuiltinFunctionDef
+from .builtin.types import DSLBoolean, DSLType, get_array_type
 from typing import Any
 
 

@@ -1,7 +1,7 @@
 
 from dataclasses import dataclass
 from typing import Any, Callable, List, Type
-from builtin.types import DSLType
+from ..types import DSLType
 
 @dataclass
 class BuiltinFunctionDef:

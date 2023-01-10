@@ -1,4 +1,4 @@
-from builtin.types import TYPENAMES
+from .builtin.types import TYPENAMES
 
 KEYWORDS = {
     'if': 'IF',

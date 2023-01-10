@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from typing import List
 from typing_extensions import Self
 
-from builtin.types.commmon import DSLType
-from builtin.types.array import DSLArray
+from ..builtin.types.commmon import DSLType
+from ..builtin.types.array import DSLArray
 from .common import ASTNode
 
 

@@ -1,10 +1,10 @@
 from abc import ABC
 from dataclasses import dataclass
-from dsl_ast.expressions import *
-from dsl_ast.statements import *
-from dsl_ast.scope_calls import *
-from dsl_ast.control import *
-from dsl_ast.definitions import *
+from .dsl_ast.expressions import *
+from .dsl_ast.statements import *
+from .dsl_ast.scope_calls import *
+from .dsl_ast.control import *
+from .dsl_ast.definitions import *
 
 
 @dataclass

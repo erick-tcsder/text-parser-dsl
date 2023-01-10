@@ -1,4 +1,4 @@
-import ast_nodes
+from .. import ast_nodes
 
 
 def p_statement_list(p):

@@ -1,5 +1,5 @@
 from ply import lex
-from keywords import KEYWORDS as reserved
+from .keywords import KEYWORDS as reserved
 
 tokens = [
     'SEMICOLON',

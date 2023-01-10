@@ -1,16 +1,16 @@
-from parser_units.expressions import *
-from parser_units.statements import *
-from parser_units.control import *
-from parser_units.typing import *
-from parser_units.definitions import *
-from semantics.semantic_checker import SemanticChecker
+from .parser_units.expressions import *
+from .parser_units.statements import *
+from .parser_units.control import *
+from .parser_units.typing import *
+from .parser_units.definitions import *
+from .semantics.semantic_checker import SemanticChecker
 from ply import *
-import lexer
-import ast_nodes
-import utils
-from evaluator import Evaluator
-from visitor import visitor
-import builtin.types as types
+from . import lexer
+from . import ast_nodes
+from . import utils
+from .evaluator import Evaluator
+from .visitor import visitor
+from .builtin import types
 
 
 tokens = lexer.tokens
