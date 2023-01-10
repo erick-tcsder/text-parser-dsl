@@ -30,15 +30,15 @@ class Loop(ASTNode):
 
 @dataclass(slots=True)
 class WhileLoop(Loop):
-    exp: Expression
-    loop_code: StatementList
+    condition: Expression
+    code: StatementList
 
     def get_children(self) -> List[ASTNode]:
-        return [self.exp, self.loop_code]
+        return [self.condition, self.code]
 
     def set_children(self, children: List[ASTNode]):
-        self.exp = children[0]
-        self.loop_code = children[1]
+        self.condition = children[0]
+        self.code = children[1]
 
 
 @dataclass(slots=True)

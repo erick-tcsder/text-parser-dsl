@@ -3,7 +3,7 @@ from parser_units.statements import *
 from parser_units.control import *
 from parser_units.typing import *
 from parser_units.definitions import *
-from semmantics.type_check import TypeCheck
+from semantics.semantic_checker import SemanticChecker
 from ply import *
 import lexer
 import ast_nodes
@@ -51,9 +51,13 @@ def p_empty(p):
 #     )
 
 
-def p_error(t):
-    print("Illegal sentence %s" % t.value)
-    t.lexer.skip(1)
+def p_error(t, *args, **kwargs):
+    if t is None:
+        print("Unexpected end of file")
+        return
+    print(f"Syntax error. line:{t.lexer.lineno} Unexpected character {t.value}")
+    skip_step = t.lexer.lexdata[t.lexer.lexpos+1:].find(';')
+    t.lexer.skip(skip_step)
 
 
 parser = yacc.yacc()
@@ -80,24 +84,24 @@ if __name__ == '__main__':
     # print(ast)
     # evaluator = evaluator.Evaluator()
     # ast = parse('( apply(5) * var / sign(-13.0,true) )+"ja";;')
-    ast = parse('''int[][] functi (int a,int b) { 
-                        5+6; 
+    ast = parse('''int[] functi (int a) { 
+                        return [a]; 
                     };
                     
-                    foreach v in values {
-                        string vaca = "vaca muu";
-                        vaca = st = 34 / 2;
-                        return 6;
+                    int[] test = [1,2,3];
+                    
+                    foreach v in test {
+                        break;
                     }; 
                     
                     while(true) {
-                        if false | true {
-                            break;
+                        if false{
+                            break
                         } else {
                             if (false) {
                                 continue;
                             };
                         };
                     };''')
-    TypeCheck().visit(ast)
-    print(f'Literals: {TypeCheck().literal_count}')
+    print(ast)
+    SemanticChecker().visit(ast)

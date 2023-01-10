@@ -21,8 +21,8 @@ def p_if_only(p):
 def p_while(p):
     '''while_loop : WHILE expression LCURLY statement_list RCURLY'''
     p[0] = ast_nodes.WhileLoop(
-        exp=p[2],
-        loop_code=p[4]
+        condition=p[2],
+        code=p[4]
     )
 
 
