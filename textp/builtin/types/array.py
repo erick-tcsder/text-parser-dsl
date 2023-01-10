@@ -6,7 +6,7 @@ from .commmon import DSLType
 
 @dataclass(slots=True)
 class DSLArray(DSLType):
-    values: list
+    value: list
 
     @abstractclassmethod
     def get_subtype(cls) -> Type[DSLType]:

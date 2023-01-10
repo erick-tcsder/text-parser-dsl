@@ -3,7 +3,6 @@ from keywords import KEYWORDS as reserved
 
 tokens = [
     'SEMICOLON',
-    'LEN',
 
     # region ExtraFirstOpsNames
     'BARROW',
@@ -60,7 +59,6 @@ t_SEMICOLON = ';'
 t_COMMA = ','
 t_DOUBLE_DOT = '\.\.'
 t_COLON = ':'
-t_LEN = '#'
 
 # region ExtraFirstOps
 # t_BARROW = r'->'

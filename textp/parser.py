@@ -8,7 +8,7 @@ from ply import *
 import lexer
 import ast_nodes
 import utils
-# import evaluator
+from evaluator import Evaluator
 from visitor import visitor
 import builtin.types as types
 
@@ -21,7 +21,6 @@ precedence = (
     ('left', 'EQ', 'NEQ', 'GR', 'LS', 'GEQ', 'LEQ'),
     ('left', 'ADD', 'MINUS'),
     ('left', 'MULT', 'DIVIDE'),
-    ('right', 'LEN'),               # Unary
     ('right', 'UMINUS'),            # Unary
     ('right', 'NOT'),               # Unary
 )
@@ -86,24 +85,27 @@ if __name__ == '__main__':
     # print(ast)
     # evaluator = evaluator.Evaluator()
     # ast = parse('( apply(5) * var / sign(-13.0,true) )+"ja";;')
-    ast = parse('''int[] functi (int a) { 
-                        return [a+$3$]; 
+    ast = parse('''int[][] cribe=[[1]];
+                    
+                    for (int i=1 : i<100 : i=i+1) {
+                        push(cribe,i,[1]);
                     };
                     
-                    int[] test = [1,2,3];
-                    
-                    foreach v in test {
-                        break;
-                    }; 
-                    
-                    while(true) {
-                        if false{
-                            break;
-                        } else {
-                            if (false) {
-                                continue;
+                    for (int i=2 : i<= 100 : i=i+1) {
+                        if (len(cribe[i-1])==1) {
+                            for (int k=i*2 : k <= 100 : k=k+i){
+                                push(cribe[k-1],len(cribe[k-1]),i);
                             };
                         };
-                    };''')
+                    };
+                    
+                    int count=len(cribe[99]);
+                    while (count>0) {
+                        output(cribe[99][count-1]);
+                        count=count-1;
+                    };
+                    
+                    ''', False)
     print(ast)
     SemanticChecker().visit(ast)
+    Evaluator().evaluate(ast)

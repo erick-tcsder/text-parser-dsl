@@ -3,14 +3,20 @@ from typing import Any, Dict, Iterable
 from typing_extensions import Self
 
 from builtin.types.commmon import DSLType
-from builtin.functions.decl import BUILTIN_FUNCS
+from builtin.functions.decl import BUILTIN_FUNCS, BuiltinFunctionDef
+from ast_nodes import FunctionDefinition
 
-@dataclass()
+
 class Scope:
     parent: Self | None = None
-    variables = {}
-    builtin_function = BUILTIN_FUNCS
-    dsl_function = {}
+    variables: Dict[str, Any] = {}
+    builtin_function: Dict[str, BuiltinFunctionDef] = BUILTIN_FUNCS
+    dsl_function: Dict[str, FunctionDefinition] = {}
+
+    def __init__(self, parent: Self | None = None):
+        self.parent = parent
+        self.dsl_function = {}
+        self.variables = {}
 
     @property
     def isGlobal(self): return self.parent is None
@@ -72,8 +78,20 @@ class Scope:
             return self.parent.getdslfunction(id)
         return v
 
+    def assignvariable(
+        self, id: str, value: Any,
+        local_only: bool = False
+    ) -> bool:
+        if id in self.variables or local_only:
+            self.variables[id] = value
+            return True
+        elif self.parent is None:
+            return False
+        else:
+            return self.parent.assignvariable(id, value)
+
     def create_child(self) -> Self:
-        return Scope(self)
+        return Scope(parent=self)
 
     @property
     def top(self) -> Self:

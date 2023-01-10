@@ -35,14 +35,3 @@ class FunctionCall(Call):
 
     def set_children(self, children: List[Expression]):
         self.args = children
-
-
-@dataclass(slots=True)
-class IndexCall(Call):
-    arg: Expression
-
-    def get_children(self) -> List[Expression]:
-        return [self.arg]
-
-    def set_children(self, children: List[Expression]):
-        self.arg = children[0]

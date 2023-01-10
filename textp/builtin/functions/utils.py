@@ -115,3 +115,19 @@ def validate_indexable_len(args: ArgumentTypes):
         return None
     if issubclass(args[0], DSLArray) or args[0] == DSLString:
         return DSLInt
+
+
+def __wrapped_input():
+    try:
+        return input()
+    except EOFError:
+        return ''
+
+
+def read_block():
+    t = ''
+    readed = __wrapped_input()
+    while (readed != ''):
+        t += readed+'\n'
+        readed = __wrapped_input()
+    return t

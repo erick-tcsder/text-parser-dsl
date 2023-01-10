@@ -105,10 +105,10 @@ __declare_function(BuiltinFunctionDef(
 __declare_function(BuiltinFunctionDef(
     name='__index',
     type_validation_func=validate_indexable_access,
-    py_func=array_pop
+    py_func=lambda arr, ind: arr[ind]
 ))
 __declare_function(BuiltinFunctionDef(
-    name='__len',
+    name='len',
     type_validation_func=validate_indexable_len,
     py_func=len
 ))
@@ -196,3 +196,17 @@ __declare_function(
     )
 )
 # endregion
+__declare_function(
+    BuiltinFunctionDef(
+        name='output',
+        type_validation_func=lambda x: (DSLString if len(x) == 1 else None),
+        py_func=lambda x: print(x)
+    )
+)
+__declare_function(
+    BuiltinFunctionDef(
+        name='__input',
+        type_validation_func=lambda: DSLString,
+        py_func=lambda: read_block()
+    )
+)

@@ -12,7 +12,7 @@ class SemanticChecker(metaclass=Singleton):
     def validate_symbol_name(self, name: str, scope: Scope):
         if name in KEYWORDS or scope.hasbuiltinfunction(name):
             raise SymbolReservedException(f"Name {name} reserved")
-        elif scope.hasdefinition(name):
+        elif scope.hasdefinition(name, local_only=True):
             raise SymbolAlreadyDeclaredException(
                 f"Symbol {name} was previously declared")
         elif name.startswith('__'):
@@ -34,7 +34,8 @@ class SemanticChecker(metaclass=Singleton):
         self.visit(p.statements, scope, *args, **kwargs)
 
     @visitor(FunctionDefinition)
-    def visit(self, _def: FunctionDefinition, scope: Scope, *args, **kwargs):
+    def visit(self, _def: FunctionDefinition, scope: Scope, *args,
+              expected_return=None, **kwargs):
         self.validate_symbol_name(_def.name, scope)
         scope.dsl_function[_def.name] = _def
         f_scope = scope.create_child()
@@ -104,7 +105,8 @@ class SemanticChecker(metaclass=Singleton):
             self.visit(ifst.else_code, scope.create_child(), *args, **kwargs)
 
     @visitor(WhileLoop)
-    def visit(self, while_loop: WhileLoop, scope: Scope, *args, **kwargs):
+    def visit(self, while_loop: WhileLoop, scope: Scope, *args,
+              allow_continue_and_break=False, **kwargs):
         if self.visit(
                 while_loop.condition, scope, *args, **kwargs) != DSLBoolean:
             raise ExpectedBooleanException(
@@ -113,20 +115,21 @@ class SemanticChecker(metaclass=Singleton):
                    **kwargs, allow_continue_and_break=True)
 
     @visitor(ForLoop)
-    def visit(self, for_loop: ForLoop, scope: Scope, *args, **kwargs):
-        self.visit(for_loop.variable_def, scope, *args, **kwargs)
-        if self.visit(for_loop.condition, scope, *args, **kwargs) != DSLBoolean:
+    def visit(self, for_loop: ForLoop, scope: Scope, *args,
+              allow_continue_and_break=False, **kwargs):
+        new_scope = scope.create_child()
+        self.visit(for_loop.variable_def, new_scope, *args, **kwargs)
+        if self.visit(
+                for_loop.condition, new_scope, *args, **kwargs) != DSLBoolean:
             raise ExpectedBooleanException(
                 f"The expression in the condition of a for statement must return a boolean value")
-        new_scope = scope.create_child()
-        self.try_variable_creation(
-            for_loop.variable_def.name, new_scope, for_loop.variable_def.type)
         self.visit(for_loop.step, new_scope, *args, **kwargs)
         self.visit(for_loop.code, new_scope, *args, **
                    kwargs, allow_continue_and_break=True)
 
     @visitor(ForeachLoop)
-    def visit(self, foreach: ForeachLoop, scope: Scope, *args, **kwargs):
+    def visit(self, foreach: ForeachLoop, scope: Scope, *args,
+              allow_continue_and_break=False, **kwargs):
         arr_type: Type[DSLArray] = self.visit(
             foreach.array, scope, *args, **kwargs)
         if not issubclass(arr_type, DSLArray):
