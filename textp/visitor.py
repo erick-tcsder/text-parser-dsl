@@ -1,3 +1,6 @@
+from typing import Any, Callable, Dict, List, Tuple
+
+
 def _qualname(obj) -> str:
     """Get the fully-qualified name of an object (including module)."""
     return obj.__module__ + '.' + obj.__qualname__
@@ -10,12 +13,19 @@ def _declaring_class(obj) -> str:
 
 
 # Stores the actual visitor methods
-_methods = {}
-
-# Delegating visitor implementation
+_methods: Dict[str, List[Tuple[type, Callable]]] = {}
 
 
-def _visitor_impl(self, arg, *args, **kwargs):
+def _impl_getter(visitor: str, arg: Any):
+    impls = _methods[visitor]
+    for tp, fn in impls:
+        if tp is None or isinstance(arg, tp):
+            return fn
+    raise Exception(
+        f"Implementation of visitor {visitor} for {type(arg)} not found nor a default")
+
+
+def _visitor_impl(self, arg, *args, **kwargs):  # Delegating visitor implementation
     """Actual visitor method implementation."""
     qnam = _qualname(type(self))
 
@@ -26,14 +36,7 @@ def _visitor_impl(self, arg, *args, **kwargs):
         return getattr(arg, magic_m_name)(*args, **kwargs)
 
     # Check if an specific visitor for that type exist
-    method = _methods.get((qnam, type(arg)), None)
-    if method is None:
-        # Call the default otherwise
-        default = _methods.get((qnam, None), None)
-        if default is None:
-            raise Exception(
-                f"Visitor in {type(self)} for {type(arg)} not found nor a default")
-        return _methods[(qnam, None)](self, arg, *args, **kwargs)
+    method = _impl_getter(qnam, arg)
 
     return method(self, arg, *args, **kwargs)
 
@@ -45,7 +48,9 @@ def visitor(arg_type=None):
 
     def decorator(fn):
         declaring_class = _declaring_class(fn)
-        _methods[(declaring_class, arg_type)] = fn
+        if declaring_class not in _methods:
+            _methods[declaring_class] = []
+        _methods[declaring_class].append((arg_type, fn))
 
         # Replace all decorated methods with _visitor_impl
         return _visitor_impl

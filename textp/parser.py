@@ -1,310 +1,111 @@
+from parser_units.expressions import *
+from parser_units.statements import *
+from parser_units.control import *
+from parser_units.typing import *
+from parser_units.definitions import *
+from semantics.semantic_checker import SemanticChecker
 from ply import *
 import lexer
-import ast_nodes 
+import ast_nodes
 import utils
-import evaluator
+from evaluator import Evaluator
+from visitor import visitor
+import builtin.types as types
+
 
 tokens = lexer.tokens
 
+precedence = (
+    ('right', 'ASSIGN'),
+    ('left', 'OR', 'AND'),
+    ('left', 'EQ', 'NEQ', 'GR', 'LS', 'GEQ', 'LEQ'),
+    ('left', 'ADD', 'MINUS'),
+    ('left', 'MULT', 'DIVIDE'),
+    ('right', 'UMINUS'),            # Unary
+    ('right', 'NOT'),               # Unary
+)
+
+start = 'program'
+
+
 def p_program(p):
     '''program : statement_list'''
-    p[0] = p[1]
+    p[0] = ast_nodes.Program(p[1])
 
 
-def p_statement_list(p):
-    '''statement_list : statement_list statement SEMICOLON 
-                      | empty'''
-    no_statement = len(p) == 2
-    if no_statement:
-        p[0] = ast_nodes.StatementList([])
-    elif p[3] == ';':
-        statement_list = p[1]
-        statement = p[2]
-        p[0] = statement_list.append(statement)  
-    else:
-        # @TODO grita
-        pass
-
-def p_statement(p):
-    '''statement : if_statement
-                 | assign
-  	             | input
-                 | output
-                 | function_definition
-                 | for_loop
-                 | foreach_loop
-                 | expression'''
-    p[0] = p[1]
-
-
-def p_assign(p):
-    '''assign : type ID ASSIGN expression
-              | ID ASSIGN expression
-              | type ID LBRACKET NUMBER RBRACKET ASSIGN LBRACKET values RBRACKET'''
-    if len(p) == 5:  # Asignación con declaración de tipo
-        p[0] = ast_nodes.VariableDefinition(
-            _type=p[1],
-            name=p[2],
-            value=p[4]
-        )
-    elif len(p) == 4:  # Asignación sin declaración de tipo
-        p[0] = ast_nodes.VariableAssignment(
-            name=p[1],
-            value=p[3]
-        )
-    else:
-        p[0] = ast_nodes.ArrayDefinition(
-            _type=p[1],
-            name=p[2],
-            size=int(p[4]),
-            values=p[8]
-        )
-
-def p_type(p):
-    '''type : TYPE
-            | TYPE LBRACKET RBRACKET'''
-    simple_type = len(p) == 2
-    if simple_type:
-        p[0] = ast_nodes.Type(name=p[1])
-    else:
-        p[0] = ast_nodes.ListOfType(name=p[1])
-
-    
 def p_empty(p):
     '''empty : '''
 
-
-def p_input(p):
-    '''input : DPIN GR GR ID'''
-    p[0] = ast_nodes.ReceivingFromInput(
-        variable_name = p[4]
-    )
-    
-
-def p_output(p):
-    '''output : ID GR GR DPOUT'''
-    p[0] = ast_nodes.SendingToOutput(
-        text_to_send = p[1]
-    )
-
-def p_expression(p):
-    '''expression : boolean_expression'''
-    p[0] = p[1]
-
-def p_function_definition(p):
-    '''function_definition : DEF type ID LPAREN parameter_list RPAREN LCURLY statement_list RCURLY'''
-    p[0] = ast_nodes.FunctionDefinition(
-        name = p[3],
-        parameters = p[5],
-        statements = p[8],
-        return_type = p[2]
-    )
-
-def p_parameter_list(p):
-    '''parameter_list : parameter_list COMMA parameter
-                      | parameter
-                      | empty'''
-    if len(p) == 2:
-        p[0] = ast_nodes.ParameterList([])
-    elif len(p) == 4:
-        parameter_list = p[1]
-        parameter = p[3]
-        p[0] = parameter_list.append(parameter)
-    else:
-        p[0] = p[1]
-
-def p_parameter(p):
-    '''parameter : type ID'''
-    p[0] = ast_nodes.Parameter(
-        _type = p[1],
-        name = p[2]
-    )
-
-def p_if_statement(p):
-    '''if_statement : IF expression THEN LCURLY statement_list RCURLY ELSE LCURLY statement_list RCURLY'''
-    p[0] = ast_nodes.IFStatement(
-        exp = p[2],
-        THENstatemet= p[5],
-        ELSEstatement = p[9]
-    )
-
-def p_boolean_expression(p):
-    '''boolean_expression : boolean_term
-                          | boolean_expression BOR boolean_term'''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = ast_nodes.ORExp(
-            exp= p[1],
-            term= p[3]
-        )
-
-def p_boolean_term(p):
-    '''boolean_term : boolean_factor
-                    | boolean_term BAND boolean_factor'''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = ast_nodes.ANDExp(
-            term = p[1],
-            factor = p[3]
-        )
-
-def p_boolean_factor(p):
-    '''boolean_factor : NOT boolean_primary
-                      | boolean_primary'''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = ast_nodes.NOTExp(p[2])
-
-def p_boolean_primary(p):
-    '''boolean_primary : comparison
-                       | LPAREN boolean_expression RPAREN'''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = p[2]
-
-def p_comparison(p):
-    '''comparison : math_expression
-                  | comparison comparison_operator math_expression'''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = ast_nodes.CMPExp(
-            exp1 = p[1],
-            exp2 = p[3],
-            op = p[2]
-        )
-    
-def p_math_expressions(p):
-    '''math_expression : term
-                       | math_expression PLUS term
-                       | math_expression MINUS term''' 
-    
-    if len(p) == 2:
-        p[0] = p[1]
-    elif p[2] == '+':
-        p[0] = ast_nodes.BinaryOperation(
-            left_value = p[1],
-            right_value = p[3],
-            op = '+'
-        )
-    else:
-        p[0] = ast_nodes.BinaryOperation(
-            left_value = p[1],
-            right_value = p[3],
-            op = '-'
-        )
-
-def p_term(p):
-    '''term : factor
-            | term TIMES factor
-            | term DIVIDE factor'''
-    if len(p)==2:
-        p[0] = p[1]
-    else:
-        if p[2] == '*':
-            p[0] = ast_nodes.BinaryOperation(
-                left_value = p[1],
-                right_value = p[3],
-                op = '*'
-            )
-        else:
-            p[0] = ast_nodes.BinaryOperation(
-                left_value = p[1],
-                right_value = p[3],
-                op = '/'
-            )
-    
-def p_comparison_operator(p):
-    '''comparison_operator : EQ
-                           | NEQ
-                           | LS
-                           | LEQ
-                           | GR
-                           | GEQ'''
-    p[0] = p[1]
+# TODO: Change syntax to avoid DPOUT shift/reduce conflict
+# def p_input(p):
+#     '''input : DPIN GR GR ID'''
+#     p[0] = ast_nodes.ReceivingFromInput(
+#         variable_name=p[4]
+#     )
 
 
-def p_factor(p):
-    '''factor : NUMBER
-              | ID
-              | LPAREN math_expression RPAREN'''
-    if len(p) == 4:
-        p[0] = p[3]
-    elif utils.is_float(p[1]):
-        p[0] = ast_nodes.Number(p[1])
-    else:
-        p[0]= ast_nodes.GetVariableValue(p[1])
-    
-
-def p_values(p):
-    '''values : value
-              | value COMMA values
-              | empty'''
-    if len(p) == 2:
-        p[0] = ast_nodes.Values([])
-    elif len(p) == 4:
-        values = p[3]
-        value = p[1]
-        p[0] = values.append(value)
-    else:
-        p[0] = p[1]
-
-def p_value(p):
-    '''value : expression'''
-    p[0] = p[1]
+# def p_output(p):
+#     '''output : ID GR GR DPOUT'''
+#     p[0] = ast_nodes.SendingToOutput(
+#         text_to_send=p[1]
+#     )
 
 
-def p_for_loop(p):
-    '''for_loop : FOR ID IN range LCURLY statement_list RCURLY'''
-    p[0] = ast_nodes.ForLoop(
-        loop_variable=p[2],
-        range=p[4],
-        statements=p[6]
-    )
+def p_error(t, *args, **kwargs):
+    if t is None:
+        print("Unexpected end of file")
+        return
+    print(f"Syntax error. line:{t.lexer.lineno} Unexpected character {t.value}")
+    skip_step = t.lexer.lexdata[t.lexer.lexpos+1:].find(';')
+    t.lexer.skip(skip_step)
+    parser.error = True
 
-def p_foreach_loop(p):
-    '''foreach_loop : FOREACH ID IN ID LCURLY statement_list RCURLY'''
-    p[0] = ast_nodes.ForeachLoop(
-        loop_variable=p[2],
-        iterable=p[4],
-        statements=p[6]
-    )
-
-def p_range(p):
-    '''range : expression DOUBLE_DOT expression
-             | expression'''
-    if len(p) == 4:
-        p[0] = ast_nodes.Range(start=p[1], end=p[3])
-    else:
-        p[0] = ast_nodes.Range(start=p[1])
-
-
-def p_error(t):
-    print("Illegal sentence %s" % t.value)
-    t.lexer.skip(1)
 
 parser = yacc.yacc()
 
 
-def parse(data, debug=False):
+def parse(data, debug=True):
     parser.error = 0
     p = parser.parse(data, debug=debug)
     if parser.error:
-        return None
+        raise Exception("Syntax error at parsing")
     return p
 
 
 if __name__ == '__main__':
-    print(parse('def INT functi (INT a, INT b, INT c) { INT c=1; } ;', debug=False))
-    print()
-    #print(parse('for i in 1..5: i >> DPOUT; ;', debug=False))
-    print()
-    #print(parse('foreach w in wordt: w >> DPOUT; ;', debug=False))
-    ast = parse("INT a [ 5 ] = [ 1 , 2, 3 , 4 , 5];", debug= False)
+    # print(
+    #     parse(
+    #         'def INT functi (INT a, INT b, INT c) { INT c=1; } ;',
+    #         debug=False))
+    # print()
+    # # print(parse('for i in 1..5: i >> DPOUT; ;', debug=False))
+    # print()
+    # # print(parse('foreach w in wordt: w >> DPOUT; ;', debug=False))
+    # ast = parse("INT a [ 5 ] = [ 1 , 2, 3 , 4 , 5];", debug=False)
+    # print(ast)
+    # evaluator = evaluator.Evaluator()
+    # ast = parse('( apply(5) * var / sign(-13.0,true) )+"ja";;')
+    ast = parse('''int[][] cribe=[[1]];
+                    
+                    for (int i=1 : i<100 : i=i+1) {
+                        push(cribe,i,[1]);
+                    };
+                    
+                    for (int i=2 : i<= 100 : i=i+1) {
+                        if (len(cribe[i-1])==1) {
+                            for (int k=i*2 : k <= 100 : k=k+i){
+                                push(cribe[k-1],len(cribe[k-1]),i);
+                            };
+                        };
+                    };
+                    
+                    int count=len(cribe[99]);
+                    while (count>0) {
+                        output(cribe[99][count-1]);
+                        count=count-1;
+                    };
+                    
+                    ''', False)
     print(ast)
-    evaluator = evaluator.Evaluator()
-    print(evaluator.visit(ast))
+    SemanticChecker().visit(ast)
+    Evaluator().evaluate(ast)

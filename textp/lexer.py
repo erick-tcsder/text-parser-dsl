@@ -1,24 +1,5 @@
 from ply import lex
-
-reserved = {
-    'if': 'IF',
-    'then': 'THEN',
-    'else': 'ELSE',
-    'while': 'WHILE',
-    'greep': 'GREEP',
-    'select': 'SELECTOR',
-    'each': 'EACH',
-    'from': 'FROM',
-    'do': 'DO',
-    'find': 'FIND',
-    'regexp': 'REGEXP',
-    'filter': 'FILTER',
-    'word': 'WORD',
-    'for': 'FOR',
-    'foreach': 'FOREACH',
-    'in': 'IN',
-    'def': 'DEF',
-}
+from keywords import KEYWORDS as reserved
 
 tokens = [
     'SEMICOLON',
@@ -28,6 +9,8 @@ tokens = [
     # endregion
 
     # region ConditionalsNames
+    'AND',
+    'OR',
     'EQ',
     'NEQ',
     'GR',
@@ -49,18 +32,13 @@ tokens = [
     'ID',  # Standard id
 
     # region ArithmeticNames
-    'PLUS',
+    'ADD',
     'MINUS',
-    'TIMES',
+    'MULT',
     'DIVIDE',
     # endregion
 
-    # region BitNames
-    'BAND',
-    'BOR',
-    'BXOR',
-    'BNOT',
-    # endregion
+    'QUOTE',
 
     'ASSIGN',
     'POINT',
@@ -69,12 +47,12 @@ tokens = [
 
     'DPIN',
     'DPOUT',
-    'TYPE',
-    'NUMBER',
+    'FLOAT',
+    'INT',
     'COMMA',
     'DOUBLE_DOT',
     'COLON',
-] + list(reserved.values())
+] + list(set(reserved.values()))
 
 
 t_SEMICOLON = ';'
@@ -87,6 +65,8 @@ t_COLON = ':'
 # endregion
 
 # region Conditionals
+t_AND = r'&'
+t_OR = r'\|'
 t_EQ = '=='
 t_NEQ = '!='
 t_GR = '>'
@@ -106,17 +86,10 @@ t_RPAREN = r'\)'
 # endregion
 
 # region Arithmetic
-t_PLUS = r'\+'
+t_ADD = r'\+'
 t_MINUS = r'-'
-t_TIMES = r'\*'
+t_MULT = r'\*'
 t_DIVIDE = r'/'
-# endregion
-
-# region Bit
-t_BAND = r'&'
-t_BOR = r'\|'
-# t_XOR = r'\^'
-t_BNOT = r'~'
 # endregion
 
 t_ASSIGN = r'='
@@ -139,11 +112,6 @@ def t_DPOUT(t):
     return t
 
 
-def t_TYPE(token):
-    r'INT|STRING|WORD'
-    return token
-
-
 def t_ID(t):
     r'[_a-zA-Z][_a-zA-Z0-9]*'
     t.type = reserved.get(t.value, 'ID')    # Check for reserved words
@@ -153,9 +121,15 @@ def t_ID(t):
 t_ignore = ' \t'
 
 
-def t_NUMBER(t):
-    r'\d+(.\d+)?'
+def t_FLOAT(t):
+    r'\d+\.\d+'
     t.value = float(t.value)
+    return t
+
+
+def t_INT(t):
+    r'\d+'
+    t.value = int(t.value)
     return t
 
 
@@ -167,11 +141,6 @@ def t_IN(t):
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
-
-
-def t_error(t):
-    print("Illegal character %s" % t.value[0])
-    t.lexer.skip(1)
 
 
 # construye el lexer
