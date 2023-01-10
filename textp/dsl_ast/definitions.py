@@ -2,7 +2,7 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import List, Type
 
-from builtin.types import DSLType
+from ..builtin.types import DSLType
 
 from .common import ASTNode
 from .expressions import Expression

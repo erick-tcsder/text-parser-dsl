@@ -1,11 +1,11 @@
-from scopes import Scope
-from ast_nodes import *
-from utils import Singleton
-from visitor import visitor
-from keywords import KEYWORDS
+from ..scopes import Scope
+from ..ast_nodes import *
+from ..utils import Singleton
+from ..visitor import visitor
+from ..keywords import KEYWORDS
 from .exceptions import *
-from builtin.functions.definition import BuiltinFunctionDef
-from builtin.types import DSLBoolean, DSLType, get_array_type
+from ..builtin.functions.definition import BuiltinFunctionDef
+from ..builtin.types import DSLBoolean, DSLType, get_array_type
 
 
 class SemanticChecker(metaclass=Singleton):

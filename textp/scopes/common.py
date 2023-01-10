@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from typing import Any, Dict, Iterable
 from typing_extensions import Self
 
-from builtin.types.commmon import DSLType
-from builtin.functions.decl import BUILTIN_FUNCS, BuiltinFunctionDef
-from ast_nodes import FunctionDefinition
+from ..builtin.types.commmon import DSLType
+from ..builtin.functions.decl import BUILTIN_FUNCS, BuiltinFunctionDef
+from ..ast_nodes import FunctionDefinition
 
 
 class Scope:

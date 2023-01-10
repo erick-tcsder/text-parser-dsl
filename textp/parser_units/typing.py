@@ -1,4 +1,4 @@
-from builtin import types
+from ..builtin import types
 
 
 def p_type_simple(p):

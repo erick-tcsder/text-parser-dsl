@@ -1,6 +1,6 @@
-import ast_nodes
-from builtin.types import DSLFloat, DSLString, DSLBoolean, DSLInt
-from utils import is_float
+from .. import ast_nodes
+from ..builtin.types import DSLFloat, DSLString, DSLBoolean, DSLInt
+from ..utils import is_float
 
 
 def p_expression_bool(p):
